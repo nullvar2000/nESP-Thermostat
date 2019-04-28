@@ -6,12 +6,14 @@
     * Enable wifi and mqtt
     * ==========================================================================*/
     #define ENABLE_WIFI
-    #define THERMOSTAT_NAME "thermostat"
+    #define THERMOSTAT_NAME "nESP" // must be unique if you have more than one on your network
     #define WIFI_INITIAL_PASSWORD "Pa55word!2"
     //#define RESET_PASSWORD_BUTTON 16
 
     #define ENABLE_MQTT
-
+    #define ENABLE_HOME_ASSISTANT_DISCOVERY
+    #define MQTT_PREFIX "home/thermostat/" 
+    
     /* ============================================================================
     * Select the HVAC type and associated pins
     * ==========================================================================*/
@@ -36,7 +38,6 @@
         #define YPin 27 // compressor
     #endif
 
-
     /* ============================================================================
     * Disable HVAC modes
     * Uncomment to disable
@@ -45,8 +46,8 @@
     //#define DISABLE_AUTO 1
     //#define DISABLE_COOL 2
     //#define DISABLE_HEAT 3
-    //#define DISABLE_EHEAT 4
-    //#define DISABLE_FAN 5
+    #define DISABLE_EHEAT 4
+    //#define DISABLE_FAN_ONLY 5
 
     /* ============================================================================
     * Fahrenheit or celsius
@@ -89,6 +90,14 @@
 
     #define I2C_SDA 21
     #define I2C_SCL 22
+
+    /* ============================================================================
+    * Enable presence detection 
+    * Set pin
+    * ==========================================================================*/
+    #define ENABLE_PRESENCE_DETECTION
+    
+    #define PRESENCE_PIN 5
 
     /* ============================================================================
     * Various optional settings

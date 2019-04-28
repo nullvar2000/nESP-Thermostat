@@ -33,7 +33,7 @@
   #define PRESENCE_SWING 2.0
 
   struct ActiveMode {
-    char name[8];
+    char name[10];
     uint8_t ePinActivate;
     uint8_t auxPinActivate;
     uint8_t gPinActivate;
@@ -42,7 +42,7 @@
   };
 
   struct MainMode {
-    char name[8];
+    char name[10];
     bool enabled;
   };
 
@@ -56,6 +56,7 @@
       void setSwing(float newSwing);
       bool getPresence();
       void setPresence(bool presence);
+      void getEnabledModeNames(char * names);
       char* getCurrentMainModeName();
       char* getCurrentActiveModeName();
 

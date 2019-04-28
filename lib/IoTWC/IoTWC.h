@@ -10,6 +10,19 @@
         #include <MQTT.h>
 
         #define STRING_LEN 64
+        #define AVAILABILITY_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/availability/state"
+        #define CURRENT_TEMP_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/temperature/state"
+        #define TARGET_TEMP_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/targettemp/state"
+        #define TARGET_TEMP_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/targettemp/set"
+        #define ACTIVE_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/active/state"
+        #define MODE_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/mode/state"
+        #define MODE_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/mode/set"
+        #define SWING_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/swing/state"
+        #define SWING_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/swing/set"
+        #define PRESENCE_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/presence/state"
+        #define PRESENCE_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/presence/set"
+        #define SUBSCRIPTION_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/+/set"
+        #define HA_DISCOVERY_TOPIC "homeassistant/climate/" THERMOSTAT_NAME "/config"
 
         char mqttServerValue[STRING_LEN];
         char mqttUserNameValue[STRING_LEN];
@@ -17,13 +30,13 @@
         unsigned long lastReport = 0;
         unsigned long lastMqttConnectionAttempt = 0;
         bool needMqttConnect = false;
-    
+        
         bool connectMqtt();
         bool connectMqttOptions();
         void mqttMessageReceived(String &topic, String &payload);
 
         WiFiClient net;
-        MQTTClient mqttClient;
+        MQTTClient mqttClient(512);
     #endif
 
     #define CONFIG_VERSION "iotwc0.1"
@@ -85,6 +98,7 @@
         #ifdef ENABLE_MQTT
             mqttClient.begin(mqttServerValue, net);
             mqttClient.onMessage(mqttMessageReceived);
+            mqttClient.setWill(AVAILABILITY_STATE_TOPIC, "offline", true, 0);
         #endif
     }
 
@@ -160,12 +174,60 @@
         }
         Serial.println("Connected!");
 
-        mqttClient.subscribe("thermostat/action");
+        Serial.print("Subscribing to ");
+        Serial.println(SUBSCRIPTION_TOPIC);
+        mqttClient.subscribe(SUBSCRIPTION_TOPIC);
+
+        #ifdef ENABLE_HOME_ASSISTANT_DISCOVERY
+            const size_t capacity = JSON_ARRAY_SIZE(6) + JSON_OBJECT_SIZE(10);
+            
+            DynamicJsonDocument doc(capacity);
+            
+            doc["name"] = THERMOSTAT_NAME;
+
+            JsonArray modes = doc.createNestedArray("modes");
+            #ifndef DISABLE_OFF
+                modes.add("off");
+            #endif
+            #ifndef DISABLE_AUTO
+                modes.add("auto");
+            #endif
+            #ifndef DISABLE_COOL
+                modes.add("cool");
+            #endif
+            #ifndef DISABLE_HEAT
+                modes.add("heat");
+            #endif
+            #ifndef DISABLE_EHEAT
+                modes.add("eheat");
+            #endif
+            #ifndef DISABLE_FAN_ONLY
+                modes.add("fan_only");
+            #endif
+
+            doc["min_temp"] = MIN_TARGET_TEMP;
+            doc["max_temp"] = MAX_TARGET_TEMP;
+            doc["avty_t"] = AVAILABILITY_STATE_TOPIC;
+            doc["curr_temp_t"] = CURRENT_TEMP_STATE_TOPIC;
+            doc["temp_cmd_t"] = TARGET_TEMP_COMMAND_TOPIC;
+            doc["temp_stat_t"] = TARGET_TEMP_STATE_TOPIC;
+            doc["mode_cmd_t"] = MODE_COMMAND_TOPIC;
+            doc["mode_stat_t"] = MODE_STATE_TOPIC;
+
+            int cap = measureJson(doc) + 1;
+            char buf[cap];
+            
+            serializeJson(doc, buf, sizeof(buf));
+
+            mqttClient.publish(HA_DISCOVERY_TOPIC, buf);
+        #endif
+
+        mqttClient.publish(AVAILABILITY_STATE_TOPIC, "online", true, 0);
+
         return true;
     }
 
-    bool connectMqttOptions()
-    {
+    bool connectMqttOptions() {
         bool result;
         if (mqttUserPasswordValue[0] != '\0') {
             result = mqttClient.connect(iotWebConf.getThingName(), mqttUserNameValue, mqttUserPasswordValue);
@@ -178,38 +240,24 @@
     }
 
     void updateMqtt(float ctemp, float ttemp, char* cmode, char* amode) {
-        const size_t capacity = JSON_OBJECT_SIZE(4) + 70;
-        DynamicJsonDocument doc(capacity);
-
-        doc["currentTemp"] = ctemp;
-        doc["targetTemp"] = ttemp;
-        doc["currentMode"] = cmode;
-        doc["activeMode"] = amode;
-
-        int cap = measureJson(doc) + 1;
-        char buf[cap];
+        char buf[8];
+        dtostrf(ctemp, 4, 1, buf);
+        mqttClient.publish(CURRENT_TEMP_STATE_TOPIC, buf);
+        dtostrf(ttemp, 4, 1, buf);
+        mqttClient.publish(TARGET_TEMP_STATE_TOPIC, buf);
+        mqttClient.publish(ACTIVE_STATE_TOPIC, amode);
+        mqttClient.publish(MODE_STATE_TOPIC, cmode);
         
-        serializeJson(doc, buf, sizeof(buf));
-        
-        mqttClient.publish("thermostat/status", buf);
     }
 
     void mqttMessageReceived(String &topic, String &payload) {
-        const int capacity = JSON_OBJECT_SIZE(2) + 40;
-        StaticJsonDocument<capacity> doc;
-
-        deserializeJson(doc, payload);
-
-        const char* command = doc["command"];
-        
-        if(strcmp("setTargetTemp",command) == 0) {
-            Serial.println("Setting target temperature");
-            _control->setTargetTemp(doc["value"]);
-        } else if(strcmp("setMode",command) == 0) {
-            Serial.println("Setting mode");
-            _control->changeMode(doc["value"]);
-        } else {
-            Serial.println("Unknown command");
+        if(topic.equals(MODE_COMMAND_TOPIC)) {
+            char buf[10];
+            payload.toCharArray(buf, 10);        
+            char *cmode = _control->changeMode(buf);
+            mqttClient.publish(MODE_STATE_TOPIC, cmode);
+        } else if(topic.equals(TARGET_TEMP_COMMAND_TOPIC)) {
+            _control->setTargetTemp(payload.toFloat());
         }
     }
 #endif

@@ -30,23 +30,18 @@
   OneButton downButton(DOWN_BUTTON_PIN, true);
 
   void modeButtonPress() {
-      log("Changed mode to ");
-      logln(control.rotateMode());
+    control.rotateMode();
   }
 
   void upButtonPress() {
     float targetTemp = control.getTargetTemp();
     targetTemp += 1.0;
-    log("Setting targetTemp to ");
-    logln(targetTemp);
     control.setTargetTemp(targetTemp);
   }
 
   void downButtonPress() {
     float targetTemp = control.getTargetTemp();
     targetTemp -= 1.0;
-    log("Setting targetTemp to ");
-    logln(targetTemp);
     control.setTargetTemp(targetTemp);
   }
 #endif
@@ -81,7 +76,26 @@ void setup() {
     initDisplay();
   #endif
 
-  control.changeMode("Off");
+  #ifdef DISABLE_OFF
+    control.disableMode(DISABLE_OFF);
+  #endif
+  #ifdef DISABLE_AUTO
+    control.disableMode(DISABLE_AUTO);
+  #endif
+  #ifdef DISABLE_COOL
+    control.disableMode(DISABLE_COOL);
+  #endif
+  #ifdef DISABLE_HEAT
+    control.disableMode(DISABLE_HEAT;
+  #endif
+  #ifdef DISABLE_EHEAT
+    control.disableMode(DISABLE_EHEAT);
+  #endif
+  #ifdef DISABLE_FAN_ONLY
+    control.disableMode(DISABLE_FAN_ONLY);
+  #endif
+
+  control.changeMode("off");
   activeMode = control.getCurrentActiveModeName();
   
   logln("Setup complete");
@@ -100,17 +114,9 @@ void loop() {
   #endif
 
   if (timeElapsed > UPDATE_INTERVAL) {
-    //log("Temperature: ");
     currentTemp = readTemperature();
-    //logln(currentTemp);
 
     activeMode = control.updateCurrentTemp(currentTemp);
-    /*log("Current mode: ");
-    logln(control.getCurrentMainModeName());
-    log("Target Temperature: ");
-    logln(control.getTargetTemp());
-    log("Currently active mode: ");
-    logln(activeMode);*/
 
     #ifdef ENABLE_MQTT
       updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), activeMode);

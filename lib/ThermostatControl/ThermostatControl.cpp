@@ -8,60 +8,60 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     activeModes[OFF_MODE].gPinActivate = 0;
     activeModes[OFF_MODE].obPinActivate = 0;
     activeModes[OFF_MODE].yPinActivate = 0;
-    strlcpy(activeModes[OFF_MODE].name,"Off",sizeof(activeModes[OFF_MODE].name));
+    strlcpy(activeModes[OFF_MODE].name,"off",sizeof(activeModes[OFF_MODE].name));
     
     activeModes[COOL_MODE].ePinActivate = 0;
     activeModes[COOL_MODE].auxPinActivate = 0;
     activeModes[COOL_MODE].gPinActivate = 1;
     activeModes[COOL_MODE].obPinActivate = 0;
     activeModes[COOL_MODE].yPinActivate = 1;
-    strlcpy(activeModes[COOL_MODE].name,"Cool",sizeof(activeModes[COOL_MODE].name));
+    strlcpy(activeModes[COOL_MODE].name,"cool",sizeof(activeModes[COOL_MODE].name));
 
     activeModes[HEAT_MODE].ePinActivate = 0;
     activeModes[HEAT_MODE].auxPinActivate = 0;
     activeModes[HEAT_MODE].gPinActivate = 1;
     activeModes[HEAT_MODE].obPinActivate = 1;
     activeModes[HEAT_MODE].yPinActivate = 1;
-    strlcpy(activeModes[HEAT_MODE].name,"Heat",sizeof(activeModes[HEAT_MODE].name));
+    strlcpy(activeModes[HEAT_MODE].name,"heat",sizeof(activeModes[HEAT_MODE].name));
 
     activeModes[EHEAT_MODE].ePinActivate = 1;
     activeModes[EHEAT_MODE].auxPinActivate = 1;
     activeModes[EHEAT_MODE].gPinActivate = 1;
     activeModes[EHEAT_MODE].obPinActivate = 1;
     activeModes[EHEAT_MODE].yPinActivate = 0;
-    strlcpy(activeModes[EHEAT_MODE].name,"EHeat",sizeof(activeModes[EHEAT_MODE].name));
+    strlcpy(activeModes[EHEAT_MODE].name,"eheat",sizeof(activeModes[EHEAT_MODE].name));
 
     activeModes[SS_HEAT_MODE].ePinActivate = 0;
     activeModes[SS_HEAT_MODE].auxPinActivate = 1;
     activeModes[SS_HEAT_MODE].gPinActivate = 1;
     activeModes[SS_HEAT_MODE].obPinActivate = 1;
     activeModes[SS_HEAT_MODE].yPinActivate = 1;
-    strlcpy(activeModes[SS_HEAT_MODE].name,"Heat",sizeof(activeModes[SS_HEAT_MODE].name));
+    strlcpy(activeModes[SS_HEAT_MODE].name,"heat",sizeof(activeModes[SS_HEAT_MODE].name));
 
     activeModes[FAN_MODE].ePinActivate = 0;
     activeModes[FAN_MODE].auxPinActivate = 0;
     activeModes[FAN_MODE].gPinActivate = 1;
     activeModes[FAN_MODE].obPinActivate = 0;
     activeModes[FAN_MODE].yPinActivate = 0;
-    strlcpy(activeModes[FAN_MODE].name,"Fan",sizeof(activeModes[FAN_MODE].name));
+    strlcpy(activeModes[FAN_MODE].name,"fan_only",sizeof(activeModes[FAN_MODE].name));
 
     mainModes[MAIN_OFF].enabled = true;
-    strlcpy(mainModes[MAIN_OFF].name,"Off",sizeof(mainModes[MAIN_OFF].name));
+    strlcpy(mainModes[MAIN_OFF].name,"off",sizeof(mainModes[MAIN_OFF].name));
 
     mainModes[MAIN_AUTO].enabled = true;
-    strlcpy(mainModes[MAIN_AUTO].name,"Auto",sizeof(mainModes[MAIN_AUTO].name));
+    strlcpy(mainModes[MAIN_AUTO].name,"auto",sizeof(mainModes[MAIN_AUTO].name));
 
     mainModes[MAIN_COOL].enabled = true;
-    strlcpy(mainModes[MAIN_COOL].name,"Cool",sizeof(mainModes[MAIN_COOL].name));
+    strlcpy(mainModes[MAIN_COOL].name,"cool",sizeof(mainModes[MAIN_COOL].name));
 
     mainModes[MAIN_HEAT].enabled = true;
-    strlcpy(mainModes[MAIN_HEAT].name,"Heat",sizeof(mainModes[MAIN_HEAT].name));
+    strlcpy(mainModes[MAIN_HEAT].name,"heat",sizeof(mainModes[MAIN_HEAT].name));
 
     mainModes[MAIN_EHEAT].enabled = true;
-    strlcpy(mainModes[MAIN_EHEAT].name,"EHeat",sizeof(mainModes[MAIN_EHEAT].name));
+    strlcpy(mainModes[MAIN_EHEAT].name,"eheat",sizeof(mainModes[MAIN_EHEAT].name));
 
     mainModes[MAIN_FAN].enabled = true;
-    strlcpy(mainModes[MAIN_FAN].name,"Fan",sizeof(mainModes[MAIN_FAN].name));
+    strlcpy(mainModes[MAIN_FAN].name,"fan_only",sizeof(mainModes[MAIN_FAN].name));
 
     ePin = e; // emergency heat
     auxPin = aux; // 2nd stage heat
@@ -120,6 +120,21 @@ void ThermostatControl::setPresence(bool presence) {
   presenceDetected = presence;
 }
 
+void ThermostatControl::getEnabledModeNames(char * names) {
+  for(int i = 0; i < NUMBER_OF_MAIN_MODES; i++) {
+    if(!mainModes[i].enabled) {
+      continue;
+    }
+
+    if(i == 0) {
+      sprintf(names, "['%s'", mainModes[i].name);
+    } else {
+      sprintf(names, "%s,'%s'", names, mainModes[i].name);
+    }
+  }
+  sprintf(names, "%s]", names);
+}
+
 char* ThermostatControl::getCurrentMainModeName() {
   return mainModes[currentMainMode].name;
 }
@@ -131,7 +146,7 @@ char* ThermostatControl::getCurrentActiveModeName() {
 char* ThermostatControl::rotateMode() {
   do {
     currentMainMode++;
-    if(currentMainMode > NUMBER_OF_MAIN_MODES) {
+    if(currentMainMode >= NUMBER_OF_MAIN_MODES) {
       currentMainMode = 0;
     }
   } while (!mainModes[currentMainMode].enabled);
