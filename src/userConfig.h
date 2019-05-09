@@ -18,8 +18,8 @@
     /* ============================================================================
     * Select the HVAC type and associated pins
     * ==========================================================================*/
-    #define HEATPUMP_HVAC_TYPE
-    //#define CONVENTIONAL_HVAC_TYPE
+    #define HEATPUMP_HVAC_TYPE 0 
+    //#define CONVENTIONAL_HVAC_TYPE 1
 
     #ifdef HEATPUMP_HVAC_TYPE
         #define EPin 32 // emergency heat
@@ -53,9 +53,10 @@
 
     /* ============================================================================
     * Fahrenheit or celsius
+    * Set USE_FAHRENHEIT to false to use celsius
+    * Adjust others as needed
     * ==========================================================================*/
-    #define USE_FAHRENHEIT
-    //#define USE_CELSIUS
+    #define USE_FAHRENHEIT true
 
     #define INITIAL_TARGET_TEMP 72.0
     #define INCREMENT_TEMP_STEP 1.0

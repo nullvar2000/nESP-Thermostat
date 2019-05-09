@@ -1,21 +1,24 @@
 #include "Arduino.h"
 #include "ThermostatControl.h"
 
-ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t ob, uint8_t y) {
+ThermostatControl::ThermostatControl(uint8_t type, bool fahrenheit, uint8_t e, uint8_t aux, uint8_t g, uint8_t ob, uint8_t y) {
 
+  if(type == 0) { // heatpump
     activeModes[OFF_MODE].ePinActivate = 0;
     activeModes[OFF_MODE].auxPinActivate = 0;
     activeModes[OFF_MODE].gPinActivate = 0;
     activeModes[OFF_MODE].obPinActivate = 0;
     activeModes[OFF_MODE].yPinActivate = 0;
     strlcpy(activeModes[OFF_MODE].name,"off",sizeof(activeModes[OFF_MODE].name));
-    
+    strlcpy(activeModes[OFF_MODE].display,"Off",sizeof(activeModes[OFF_MODE].display));
+
     activeModes[COOL_MODE].ePinActivate = 0;
     activeModes[COOL_MODE].auxPinActivate = 0;
     activeModes[COOL_MODE].gPinActivate = 1;
     activeModes[COOL_MODE].obPinActivate = 0;
     activeModes[COOL_MODE].yPinActivate = 1;
     strlcpy(activeModes[COOL_MODE].name,"cool",sizeof(activeModes[COOL_MODE].name));
+    strlcpy(activeModes[COOL_MODE].display,"Cool",sizeof(activeModes[COOL_MODE].display));
 
     activeModes[HEAT_MODE].ePinActivate = 0;
     activeModes[HEAT_MODE].auxPinActivate = 0;
@@ -23,6 +26,7 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     activeModes[HEAT_MODE].obPinActivate = 1;
     activeModes[HEAT_MODE].yPinActivate = 1;
     strlcpy(activeModes[HEAT_MODE].name,"heat",sizeof(activeModes[HEAT_MODE].name));
+    strlcpy(activeModes[HEAT_MODE].display,"Heat",sizeof(activeModes[HEAT_MODE].display));
 
     activeModes[EHEAT_MODE].ePinActivate = 1;
     activeModes[EHEAT_MODE].auxPinActivate = 1;
@@ -30,6 +34,7 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     activeModes[EHEAT_MODE].obPinActivate = 1;
     activeModes[EHEAT_MODE].yPinActivate = 0;
     strlcpy(activeModes[EHEAT_MODE].name,"eheat",sizeof(activeModes[EHEAT_MODE].name));
+    strlcpy(activeModes[EHEAT_MODE].display,"EM Heat",sizeof(activeModes[EHEAT_MODE].display));
 
     activeModes[SS_HEAT_MODE].ePinActivate = 0;
     activeModes[SS_HEAT_MODE].auxPinActivate = 1;
@@ -37,6 +42,7 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     activeModes[SS_HEAT_MODE].obPinActivate = 1;
     activeModes[SS_HEAT_MODE].yPinActivate = 1;
     strlcpy(activeModes[SS_HEAT_MODE].name,"heat",sizeof(activeModes[SS_HEAT_MODE].name));
+    strlcpy(activeModes[SS_HEAT_MODE].display,"Heat x2",sizeof(activeModes[SS_HEAT_MODE].display));
 
     activeModes[FAN_MODE].ePinActivate = 0;
     activeModes[FAN_MODE].auxPinActivate = 0;
@@ -44,47 +50,112 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     activeModes[FAN_MODE].obPinActivate = 0;
     activeModes[FAN_MODE].yPinActivate = 0;
     strlcpy(activeModes[FAN_MODE].name,"fan_only",sizeof(activeModes[FAN_MODE].name));
+    strlcpy(activeModes[FAN_MODE].display,"Fan",sizeof(activeModes[FAN_MODE].display));
+  } else if(type == 1) { // conventional
+    activeModes[OFF_MODE].ePinActivate = 0;
+    activeModes[OFF_MODE].auxPinActivate = 0;
+    activeModes[OFF_MODE].gPinActivate = 0;
+    activeModes[OFF_MODE].obPinActivate = 0;
+    activeModes[OFF_MODE].yPinActivate = 0;
+    strlcpy(activeModes[OFF_MODE].name,"off",sizeof(activeModes[OFF_MODE].name));
+    strlcpy(activeModes[OFF_MODE].display,"Off",sizeof(activeModes[OFF_MODE].display));
 
-    mainModes[MAIN_OFF].enabled = true;
-    strlcpy(mainModes[MAIN_OFF].name,"off",sizeof(mainModes[MAIN_OFF].name));
+    activeModes[COOL_MODE].ePinActivate = 0;
+    activeModes[COOL_MODE].auxPinActivate = 0;
+    activeModes[COOL_MODE].gPinActivate = 1;
+    activeModes[COOL_MODE].obPinActivate = 0;
+    activeModes[COOL_MODE].yPinActivate = 1;
+    strlcpy(activeModes[COOL_MODE].name,"cool",sizeof(activeModes[COOL_MODE].name));
+    strlcpy(activeModes[COOL_MODE].display,"Cool",sizeof(activeModes[COOL_MODE].display));
 
-    mainModes[MAIN_AUTO].enabled = true;
-    strlcpy(mainModes[MAIN_AUTO].name,"auto",sizeof(mainModes[MAIN_AUTO].name));
+    activeModes[HEAT_MODE].ePinActivate = 0;
+    activeModes[HEAT_MODE].auxPinActivate = 0;
+    activeModes[HEAT_MODE].gPinActivate = 1;
+    activeModes[HEAT_MODE].obPinActivate = 1;
+    activeModes[HEAT_MODE].yPinActivate = 1;
+    strlcpy(activeModes[HEAT_MODE].name,"heat",sizeof(activeModes[HEAT_MODE].name));
+    strlcpy(activeModes[HEAT_MODE].display,"Heat",sizeof(activeModes[HEAT_MODE].display));
 
-    mainModes[MAIN_COOL].enabled = true;
-    strlcpy(mainModes[MAIN_COOL].name,"cool",sizeof(mainModes[MAIN_COOL].name));
+    activeModes[EHEAT_MODE].ePinActivate = 1;
+    activeModes[EHEAT_MODE].auxPinActivate = 1;
+    activeModes[EHEAT_MODE].gPinActivate = 1;
+    activeModes[EHEAT_MODE].obPinActivate = 1;
+    activeModes[EHEAT_MODE].yPinActivate = 0;
+    strlcpy(activeModes[EHEAT_MODE].name,"eheat",sizeof(activeModes[EHEAT_MODE].name));
+    strlcpy(activeModes[EHEAT_MODE].display,"EM Heat",sizeof(activeModes[EHEAT_MODE].display));
 
-    mainModes[MAIN_HEAT].enabled = true;
-    strlcpy(mainModes[MAIN_HEAT].name,"heat",sizeof(mainModes[MAIN_HEAT].name));
+    activeModes[SS_HEAT_MODE].ePinActivate = 0;
+    activeModes[SS_HEAT_MODE].auxPinActivate = 1;
+    activeModes[SS_HEAT_MODE].gPinActivate = 1;
+    activeModes[SS_HEAT_MODE].obPinActivate = 1;
+    activeModes[SS_HEAT_MODE].yPinActivate = 1;
+    strlcpy(activeModes[SS_HEAT_MODE].name,"heat",sizeof(activeModes[SS_HEAT_MODE].name));
+    strlcpy(activeModes[SS_HEAT_MODE].display,"Heat x2",sizeof(activeModes[SS_HEAT_MODE].display));
 
-    mainModes[MAIN_EHEAT].enabled = true;
-    strlcpy(mainModes[MAIN_EHEAT].name,"eheat",sizeof(mainModes[MAIN_EHEAT].name));
+    activeModes[FAN_MODE].ePinActivate = 0;
+    activeModes[FAN_MODE].auxPinActivate = 0;
+    activeModes[FAN_MODE].gPinActivate = 1;
+    activeModes[FAN_MODE].obPinActivate = 0;
+    activeModes[FAN_MODE].yPinActivate = 0;
+    strlcpy(activeModes[FAN_MODE].name,"fan_only",sizeof(activeModes[FAN_MODE].name));
+    strlcpy(activeModes[FAN_MODE].display,"Fan",sizeof(activeModes[FAN_MODE].display));
+  }
 
-    mainModes[MAIN_FAN].enabled = true;
-    strlcpy(mainModes[MAIN_FAN].name,"fan_only",sizeof(mainModes[MAIN_FAN].name));
+  mainModes[MAIN_OFF].enabled = true;
+  strlcpy(mainModes[MAIN_OFF].name,"off",sizeof(mainModes[MAIN_OFF].name));
+  strlcpy(mainModes[MAIN_OFF].display,"Off",sizeof(mainModes[MAIN_OFF].display));
 
-    ePin = e; // emergency heat
-    auxPin = aux; // 2nd stage heat
-    gPin = g; // fan
-    obPin = ob; // reversing valve, on for cool, off for heat
-    yPin = y; // compressor
-    
-    currentMainMode = OFF_MODE;
-    currentActiveMode = OFF_MODE;
-    lastOffTime = 0;
-    targetTemp = DEFAULT_TARGET_TEMP;
-    currentTemp = targetTemp;
-    swing = DEFAULT_SWING;
-    presenceDetected = true;
-    heatLedPin = DISABLED_LED;
-    coolLedPin = DISABLED_LED;
-    fanLedPin = DISABLED_LED;
+  mainModes[MAIN_AUTO].enabled = true;
+  strlcpy(mainModes[MAIN_AUTO].name,"auto",sizeof(mainModes[MAIN_AUTO].name));
+  strlcpy(mainModes[MAIN_AUTO].display,"Auto",sizeof(mainModes[MAIN_AUTO].display));
 
-    pinMode(ePin, OUTPUT);
-    pinMode(auxPin, OUTPUT);
-    pinMode(gPin, OUTPUT);
-    pinMode(obPin, OUTPUT);
-    pinMode(yPin, OUTPUT);
+  mainModes[MAIN_COOL].enabled = true;
+  strlcpy(mainModes[MAIN_COOL].name,"cool",sizeof(mainModes[MAIN_COOL].name));
+  strlcpy(mainModes[MAIN_COOL].display,"Cool",sizeof(mainModes[MAIN_COOL].display));
+
+  mainModes[MAIN_HEAT].enabled = true;
+  strlcpy(mainModes[MAIN_HEAT].name,"heat",sizeof(mainModes[MAIN_HEAT].name));
+  strlcpy(mainModes[MAIN_HEAT].display,"Heat",sizeof(mainModes[MAIN_HEAT].display));
+
+  mainModes[MAIN_EHEAT].enabled = true;
+  strlcpy(mainModes[MAIN_EHEAT].name,"eheat",sizeof(mainModes[MAIN_EHEAT].name));
+  strlcpy(mainModes[MAIN_EHEAT].display,"Heat",sizeof(mainModes[MAIN_EHEAT].display));
+
+  mainModes[MAIN_FAN].enabled = true;
+  strlcpy(mainModes[MAIN_FAN].name,"fan_only",sizeof(mainModes[MAIN_FAN].name));
+  strlcpy(mainModes[MAIN_FAN].display,"Fan",sizeof(mainModes[MAIN_FAN].display));
+
+  if(fahrenheit) {
+    minTargetTemp = MIN_TARGET_TEMP_F;
+    maxTargetTemp = MAX_TARGET_TEMP_F;
+    targetTemp = DEFAULT_TARGET_TEMP_F;
+  } else {
+    minTargetTemp = MIN_TARGET_TEMP_C;
+    maxTargetTemp = MAX_TARGET_TEMP_C;
+    targetTemp = DEFAULT_TARGET_TEMP_C; 
+  }
+
+  ePin = e; // emergency heat
+  auxPin = aux; // 2nd stage heat
+  gPin = g; // fan
+  obPin = ob; // reversing valve, on for cool, off for heat
+  yPin = y; // compressor
+  
+  currentMainMode = OFF_MODE;
+  currentActiveMode = OFF_MODE;
+  lastOffTime = 0;
+  currentTemp = targetTemp;
+  swing = DEFAULT_SWING;
+  presenceDetected = true;
+  heatLedPin = DISABLED_LED;
+  coolLedPin = DISABLED_LED;
+  fanLedPin = DISABLED_LED;
+
+  pinMode(ePin, OUTPUT);
+  pinMode(auxPin, OUTPUT);
+  pinMode(gPin, OUTPUT);
+  pinMode(obPin, OUTPUT);
+  pinMode(yPin, OUTPUT);
 }
 
 float ThermostatControl::getTargetTemp() {
@@ -92,10 +163,10 @@ float ThermostatControl::getTargetTemp() {
 }
 
 void ThermostatControl::setTargetTemp(float target) {
-  if(target < MIN_TARGET_TEMP) {
-    targetTemp = MIN_TARGET_TEMP;
-  } else if(target > MAX_TARGET_TEMP) {
-    targetTemp = MAX_TARGET_TEMP;
+  if(target < minTargetTemp) {
+    targetTemp = minTargetTemp;
+  } else if(target > maxTargetTemp) {
+    targetTemp = maxTargetTemp;
   } else {
     targetTemp = target;
   }
@@ -144,6 +215,14 @@ char* ThermostatControl::getCurrentMainModeName() {
 
 char* ThermostatControl::getCurrentActiveModeName() {
   return activeModes[currentActiveMode].name;
+}
+
+char* ThermostatControl::getCurrentMainModeDisplay() {
+  return mainModes[currentMainMode].display;
+}
+
+char* ThermostatControl::getCurrentActiveModeDisplay() {
+  return activeModes[currentActiveMode].display;
 }
 
 char* ThermostatControl::rotateMode() {

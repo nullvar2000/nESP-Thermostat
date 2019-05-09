@@ -21,7 +21,9 @@
 #endif
 
 #ifdef HEATPUMP_HVAC_TYPE
-  ThermostatControl control(EPin, AuxPin, GPin, OBPin, YPin);
+  ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, EPin, AuxPin, GPin, OBPin, YPin);
+#elif CONVENTIONAL_HVAC_TYPE
+  ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, EPin, AuxPin, GPin, OBPin, YPin);
 #endif
 
 #ifdef ENABLE_BUTTONS
@@ -48,7 +50,6 @@
 
 float targetTemp = INITIAL_TARGET_TEMP;
 float currentTemp = 0.0;
-char* activeMode;
 elapsedMillis timeElapsed = 0;
 
 void setup() {
@@ -86,7 +87,7 @@ void setup() {
     control.disableMode(DISABLE_COOL);
   #endif
   #ifdef DISABLE_HEAT
-    control.disableMode(DISABLE_HEAT;
+    control.disableMode(DISABLE_HEAT);
   #endif
   #ifdef DISABLE_EHEAT
     control.disableMode(DISABLE_EHEAT);
@@ -101,8 +102,6 @@ void setup() {
     control.setFanLedPin(FAN_LED_PIN);
   #endif
 
-  activeMode = control.getCurrentActiveModeName();
-  
   logln("Setup complete");
 }
 
@@ -121,17 +120,17 @@ void loop() {
   if (timeElapsed > UPDATE_INTERVAL) {
     currentTemp = readTemperature();
 
-    activeMode = control.updateCurrentTemp(currentTemp);
+    control.updateCurrentTemp(currentTemp);
 
     #ifdef ENABLE_MQTT
-      updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), activeMode);
+      updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentMainModeName());
     #endif
 
     timeElapsed = 0;
   }
 
   #ifdef ENABLE_DISPLAY
-    updateDisplay(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), activeMode);
+    updateDisplay(currentTemp, control.getTargetTemp(), control.getCurrentMainModeDisplay(), control.getCurrentActiveModeDisplay());
   #endif
 }
 

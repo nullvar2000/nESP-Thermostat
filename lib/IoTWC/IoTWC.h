@@ -205,8 +205,13 @@
                 modes.add("fan_only");
             #endif
 
-            doc["min_temp"] = MIN_TARGET_TEMP;
-            doc["max_temp"] = MAX_TARGET_TEMP;
+            if(USE_FAHRENHEIT) {
+                doc["min_temp"] = MIN_TARGET_TEMP_F;
+                doc["max_temp"] = MAX_TARGET_TEMP_F;
+            } else {
+                doc["min_temp"] = MIN_TARGET_TEMP_C;
+                doc["max_temp"] = MAX_TARGET_TEMP_C;
+            }
             doc["avty_t"] = AVAILABILITY_STATE_TOPIC;
             doc["curr_temp_t"] = CURRENT_TEMP_STATE_TOPIC;
             doc["temp_cmd_t"] = TARGET_TEMP_COMMAND_TOPIC;
@@ -258,6 +263,9 @@
             mqttClient.publish(MODE_STATE_TOPIC, cmode);
         } else if(topic.equals(TARGET_TEMP_COMMAND_TOPIC)) {
             _control->setTargetTemp(payload.toFloat());
+            char buf[8];
+    		dtostrf(_control->getTargetTemp(), 4, 1, buf);
+	    	mqttClient.publish(TARGET_TEMP_STATE_TOPIC, buf);
         }
     }
 #endif

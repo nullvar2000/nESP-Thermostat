@@ -21,9 +21,12 @@
   #define NUMBER_OF_ACTIVE_MODES 6
 
   #define COMPRESSOR_REST 20000
-  #define MAX_TARGET_TEMP 80.0
-  #define MIN_TARGET_TEMP 60.0
-  #define DEFAULT_TARGET_TEMP 72.0
+  #define MAX_TARGET_TEMP_F 80.0
+  #define MIN_TARGET_TEMP_F 60.0
+  #define DEFAULT_TARGET_TEMP_F 72.0
+  #define MAX_TARGET_TEMP_C 15.0
+  #define MIN_TARGET_TEMP_C 25.0
+  #define DEFAULT_TARGET_TEMP_C 22
   #define SECOND_STAGE_DIFFERENCE 1.5
   #define FAN_TRAIL 20000
   #define DEFAULT_SWING 0.50
@@ -35,6 +38,7 @@
 
   struct ActiveMode {
     char name[10];
+    char display[10];
     uint8_t ePinActivate;
     uint8_t auxPinActivate;
     uint8_t gPinActivate;
@@ -44,12 +48,13 @@
 
   struct MainMode {
     char name[10];
+    char display[10];
     bool enabled;
   };
 
   class ThermostatControl {
     public:
-      ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t ob, uint8_t y);
+      ThermostatControl(uint8_t type, bool fahrenheit, uint8_t e, uint8_t aux, uint8_t g, uint8_t ob, uint8_t y);
 
       float getTargetTemp();
       void setTargetTemp(float target);
@@ -61,6 +66,8 @@
       void getEnabledModeNames(char * names);
       char* getCurrentMainModeName();
       char* getCurrentActiveModeName();
+      char* getCurrentMainModeDisplay();
+      char* getCurrentActiveModeDisplay();
 
       char* rotateMode();
       char* changeMode(const char *modeName);
@@ -83,6 +90,8 @@
       uint8_t gPin;
       uint8_t obPin;
       uint8_t yPin;
+      uint8_t minTargetTemp;
+      uint8_t maxTargetTemp;
       uint8_t heatLedPin;
       uint8_t coolLedPin;
       uint8_t fanLedPin;

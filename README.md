@@ -22,4 +22,12 @@ The exact libraries required by nESP depend on what is enabled in the userConfig
   
 All of these are available through the Platformio library management.
 
+# To Do
 
+  - JSON for state updates
+  - Enable presence detection
+  - Configure conventional HVAC switches
+  - Configure web interface
+  - Improve loggin
+  - Add more sensors/displays
+  - Add libs to platformio.ini
