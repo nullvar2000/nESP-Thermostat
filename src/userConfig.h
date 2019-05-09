@@ -11,8 +11,9 @@
     //#define RESET_PASSWORD_BUTTON 16
 
     #define ENABLE_MQTT
-    #define ENABLE_HOME_ASSISTANT_DISCOVERY
     #define MQTT_PREFIX "home/thermostat/" 
+    
+    #define ENABLE_HOME_ASSISTANT_DISCOVERY
     
     /* ============================================================================
     * Select the HVAC type and associated pins
@@ -29,6 +30,7 @@
         #define LPin -1
     #endif
 
+    // not working yet
     #ifdef CONVENTIONAL_HVAC_TYPE
         #define EPin 32 // emergency heat
         #define WPin 33 // heat
@@ -55,6 +57,9 @@
     #define USE_FAHRENHEIT
     //#define USE_CELSIUS
 
+    #define INITIAL_TARGET_TEMP 72.0
+    #define INCREMENT_TEMP_STEP 1.0
+
     /* ============================================================================
     * Select the temperature sensor and pin
     * ==========================================================================*/
@@ -78,6 +83,7 @@
     #define ENABLE_LEDS
 
     #define STATUS_LED_PIN 12
+    #define FAN_LED_PIN 12
     #define COOL_LED_PIN 13 
     #define HEAT_LED_PIN 14
 

@@ -35,18 +35,18 @@
 
   void upButtonPress() {
     float targetTemp = control.getTargetTemp();
-    targetTemp += 1.0;
+    targetTemp += INCREMENT_TEMP_STEP;
     control.setTargetTemp(targetTemp);
   }
 
   void downButtonPress() {
     float targetTemp = control.getTargetTemp();
-    targetTemp -= 1.0;
+    targetTemp -= INCREMENT_TEMP_STEP;
     control.setTargetTemp(targetTemp);
   }
 #endif
 
-float targetTemp = 70.0;
+float targetTemp = INITIAL_TARGET_TEMP;
 float currentTemp = 0.0;
 char* activeMode;
 elapsedMillis timeElapsed = 0;
@@ -95,7 +95,12 @@ void setup() {
     control.disableMode(DISABLE_FAN_ONLY);
   #endif
 
-  control.changeMode("off");
+  #ifdef ENABLE_LEDS
+    control.setCoolLedPin(COOL_LED_PIN);
+    control.setHeatLedPin(HEAT_LED_PIN);
+    control.setFanLedPin(FAN_LED_PIN);
+  #endif
+
   activeMode = control.getCurrentActiveModeName();
   
   logln("Setup complete");

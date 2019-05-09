@@ -31,6 +31,7 @@
   #define MIN_SWING 0.5
   #define AUTO_SWING 2.0
   #define PRESENCE_SWING 2.0
+  #define DISABLED_LED 255
 
   struct ActiveMode {
     char name[10];
@@ -56,6 +57,7 @@
       void setSwing(float newSwing);
       bool getPresence();
       void setPresence(bool presence);
+
       void getEnabledModeNames(char * names);
       char* getCurrentMainModeName();
       char* getCurrentActiveModeName();
@@ -63,8 +65,11 @@
       char* rotateMode();
       char* changeMode(const char *modeName);
       char* updateCurrentTemp(float current);
-
       void disableMode(uint8_t modeIndex);
+
+      void setHeatLedPin(uint8_t pin);
+      void setCoolLedPin(uint8_t pin);
+      void setFanLedPin(uint8_t pin);
 
     private:
       ActiveMode activeModes[NUMBER_OF_ACTIVE_MODES];
@@ -78,6 +83,9 @@
       uint8_t gPin;
       uint8_t obPin;
       uint8_t yPin;
+      uint8_t heatLedPin;
+      uint8_t coolLedPin;
+      uint8_t fanLedPin;
 
       float targetTemp;
       float currentTemp;

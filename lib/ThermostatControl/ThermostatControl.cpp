@@ -73,9 +73,12 @@ ThermostatControl::ThermostatControl(uint8_t e, uint8_t aux, uint8_t g, uint8_t 
     currentActiveMode = OFF_MODE;
     lastOffTime = 0;
     targetTemp = DEFAULT_TARGET_TEMP;
-    currentTemp = DEFAULT_TARGET_TEMP;
+    currentTemp = targetTemp;
     swing = DEFAULT_SWING;
     presenceDetected = true;
+    heatLedPin = DISABLED_LED;
+    coolLedPin = DISABLED_LED;
+    fanLedPin = DISABLED_LED;
 
     pinMode(ePin, OUTPUT);
     pinMode(auxPin, OUTPUT);
@@ -127,12 +130,12 @@ void ThermostatControl::getEnabledModeNames(char * names) {
     }
 
     if(i == 0) {
-      sprintf(names, "['%s'", mainModes[i].name);
+      sprintf(names, "'%s'", mainModes[i].name);
     } else {
       sprintf(names, "%s,'%s'", names, mainModes[i].name);
     }
   }
-  sprintf(names, "%s]", names);
+  sprintf(names, "%s", names);
 }
 
 char* ThermostatControl::getCurrentMainModeName() {
@@ -201,6 +204,10 @@ char* ThermostatControl::updateCurrentTemp(float current) {
   if(currentMainMode != MAIN_FAN && currentActiveMode == FAN_MODE && lastOffTime > FAN_TRAIL) {
     digitalWrite(gPin, LOW);
     currentActiveMode = OFF_MODE;
+
+    if(fanLedPin != DISABLED_LED) {
+      digitalWrite(fanLedPin, LOW);
+    }
   }
 
   return activeModes[currentActiveMode].name;
@@ -210,6 +217,21 @@ void ThermostatControl::disableMode(uint8_t modeIndex) {
   if(modeIndex >= 0 && modeIndex < 6) {
     mainModes[modeIndex].enabled = false;
   }
+}
+
+void ThermostatControl::setHeatLedPin(uint8_t pin) {
+  heatLedPin = pin;
+  pinMode(heatLedPin, OUTPUT);
+}
+
+void ThermostatControl::setCoolLedPin(uint8_t pin) {
+  coolLedPin = pin;
+  pinMode(coolLedPin, OUTPUT);
+}
+
+void ThermostatControl::setFanLedPin(uint8_t pin) {
+  fanLedPin = pin;
+  pinMode(fanLedPin, OUTPUT);
 }
 
 float ThermostatControl::calculateSwing() {
@@ -237,6 +259,18 @@ uint8_t ThermostatControl::activate(uint8_t mode) {
   digitalWrite(obPin, activeModes[mode].obPinActivate);
   digitalWrite(yPin, activeModes[mode].yPinActivate);
   
+  if(mode == COOL_MODE && coolLedPin != DISABLED_LED) {
+    digitalWrite(coolLedPin, HIGH);
+  }
+  
+  if((mode == HEAT_MODE || mode == EHEAT_MODE || mode == SS_HEAT_MODE) && heatLedPin != DISABLED_LED) {
+    digitalWrite(heatLedPin, HIGH);
+  }
+
+  if(mode == FAN_MODE && fanLedPin != DISABLED_LED) {
+    digitalWrite(fanLedPin, HIGH);
+  }
+
   currentActiveMode = mode;
 
   return currentActiveMode;
@@ -244,18 +278,35 @@ uint8_t ThermostatControl::activate(uint8_t mode) {
 
 uint8_t ThermostatControl::deactivate() {
 
-  if(currentActiveMode == HEAT_MODE || currentActiveMode == EHEAT_MODE || currentActiveMode == COOL_MODE) {
+  if(currentActiveMode == HEAT_MODE || currentActiveMode == EHEAT_MODE || currentActiveMode == SS_HEAT_MODE || currentActiveMode == COOL_MODE) {
     lastOffTime = 0;
     currentActiveMode = FAN_MODE;
+
+    if(coolLedPin != DISABLED_LED) {
+      digitalWrite(coolLedPin, LOW);
+    }
+
+    if(heatLedPin != DISABLED_LED) {
+      digitalWrite(heatLedPin, LOW);
+    }
+
+    if(fanLedPin != DISABLED_LED) {
+      digitalWrite(fanLedPin, HIGH);
+    }
+
   } else {
     currentActiveMode = OFF_MODE;
     digitalWrite(gPin, LOW); // fan
+
+    if(fanLedPin != DISABLED_LED) {
+      digitalWrite(fanLedPin, LOW);
+    }
   }
 
   digitalWrite(ePin, LOW); // emergency heat
   digitalWrite(auxPin, LOW); // 2nd stage heat
   // leave fan on for trailing time
-  //digitalWrite(gPin, HIGH); // fan
+  //digitalWrite(gPin, LOW); // fan
   digitalWrite(obPin, LOW); // reversing valve, high for cool
   digitalWrite(yPin, LOW); // compressor
 
