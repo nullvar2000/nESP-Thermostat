@@ -8,7 +8,7 @@
     #define ENABLE_WIFI
     #define THERMOSTAT_NAME "nESP" // must be unique if you have more than one on your network
     #define WIFI_INITIAL_PASSWORD "Pa55word!2"
-    //#define RESET_PASSWORD_BUTTON 16
+    #define RESET_PASSWORD_BUTTON 16
 
     #define ENABLE_MQTT
     #define MQTT_PREFIX "home/thermostat/" 
@@ -58,7 +58,6 @@
     * ==========================================================================*/
     #define USE_FAHRENHEIT true
 
-    #define INITIAL_TARGET_TEMP 72.0
     #define INCREMENT_TEMP_STEP 1.0
 
     /* ============================================================================
@@ -105,6 +104,7 @@
     #define ENABLE_PRESENCE_DETECTION
     
     #define PRESENCE_PIN 5
+    #define PRESENCE_COOLDOWN 1800000
 
     /* ============================================================================
     * Various optional settings

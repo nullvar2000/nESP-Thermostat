@@ -1,8 +1,6 @@
 #ifndef THERMOSTATCONTROL_H
   #define THERMOSTATCONTROL_H
 
-  #include <elapsedMillis.h>
-
   #define OFF_MODE 0
   #define COOL_MODE 1
   #define HEAT_MODE 2
@@ -20,7 +18,7 @@
   #define NUMBER_OF_MAIN_MODES 6
   #define NUMBER_OF_ACTIVE_MODES 6
 
-  #define COMPRESSOR_REST 20000
+  #define COMPRESSOR_REST 30000
   #define MAX_TARGET_TEMP_F 80.0
   #define MIN_TARGET_TEMP_F 60.0
   #define DEFAULT_TARGET_TEMP_F 72.0
@@ -101,7 +99,7 @@
       float swing;
       bool presenceDetected;
 
-      elapsedMillis lastOffTime;
+      unsigned long lastOffTime;
 
       float calculateSwing();
       uint8_t activate(uint8_t mode);

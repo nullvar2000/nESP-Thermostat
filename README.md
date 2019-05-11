@@ -18,16 +18,14 @@ The exact libraries required by nESP depend on what is enabled in the userConfig
   - ArduinoJson by Benoît Blanchon      https://github.com/bblanchon/ArduinoJson
   - MQTT by Joël Gähwiler               https://github.com/256dpi/arduino-mqtt
   - OneButton by Matthias Hertel        https://github.com/mathertel/OneButton
-  - EllapsedMillis by Paul Stoffregen   http://www.pjrc.com/teensy/td_timing.html
   
 All of these are available through the Platformio library management.
 
 # To Do
 
   - JSON for state updates
-  - Enable presence detection
   - Configure conventional HVAC switches
   - Configure web interface
-  - Improve loggin
+  - Improve logging
   - Add more sensors/displays
   - Add libs to platformio.ini

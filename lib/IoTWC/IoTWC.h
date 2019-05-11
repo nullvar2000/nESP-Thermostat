@@ -252,6 +252,14 @@
         mqttClient.publish(TARGET_TEMP_STATE_TOPIC, buf);
         mqttClient.publish(ACTIVE_STATE_TOPIC, amode);
         mqttClient.publish(MODE_STATE_TOPIC, cmode);
+
+        #ifdef ENABLE_PRESENCE_DETECTION
+            if(_control->getPresence()) {
+                mqttClient.publish(PRESENCE_STATE_TOPIC, "true");
+            } else {
+                mqttClient.publish(PRESENCE_STATE_TOPIC, "false");
+            }
+        #endif
         
     }
 
@@ -266,6 +274,14 @@
             char buf[8];
     		dtostrf(_control->getTargetTemp(), 4, 1, buf);
 	    	mqttClient.publish(TARGET_TEMP_STATE_TOPIC, buf);
+        } else if(topic.equals(PRESENCE_COMMAND_TOPIC)) {
+            if(payload.equals("true")) {
+                _control->setPresence(true);
+                mqttClient.publish(PRESENCE_STATE_TOPIC, "true");
+            } else {
+                _control->setPresence(false);
+                mqttClient.publish(PRESENCE_STATE_TOPIC, "false");
+            }
         }
     }
 #endif

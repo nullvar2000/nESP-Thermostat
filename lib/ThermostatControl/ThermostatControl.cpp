@@ -280,7 +280,7 @@ char* ThermostatControl::updateCurrentTemp(float current) {
   }
   
   // turn off fan after trailing time
-  if(currentMainMode != MAIN_FAN && currentActiveMode == FAN_MODE && lastOffTime > FAN_TRAIL) {
+  if(currentMainMode != MAIN_FAN && currentActiveMode == FAN_MODE && millis() > lastOffTime + FAN_TRAIL) {
     digitalWrite(gPin, LOW);
     currentActiveMode = OFF_MODE;
 
@@ -328,7 +328,7 @@ uint8_t ThermostatControl::activate(uint8_t mode) {
   }
   
   // compressor has not had enough rest
-  if(lastOffTime < COMPRESSOR_REST) { 
+  if(millis() < lastOffTime + COMPRESSOR_REST) { 
     return -1;
   }
 
@@ -358,7 +358,7 @@ uint8_t ThermostatControl::activate(uint8_t mode) {
 uint8_t ThermostatControl::deactivate() {
 
   if(currentActiveMode == HEAT_MODE || currentActiveMode == EHEAT_MODE || currentActiveMode == SS_HEAT_MODE || currentActiveMode == COOL_MODE) {
-    lastOffTime = 0;
+    lastOffTime = millis();
     currentActiveMode = FAN_MODE;
 
     if(coolLedPin != DISABLED_LED) {

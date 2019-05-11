@@ -4,8 +4,6 @@
 #include "TemperatureSensor.h"
 #include "Logger.h"
 
-#include <elapsedMillis.h>
-
 #define VERSION 0.1
 
 #ifdef ENABLE_WIFI
@@ -48,9 +46,14 @@
   }
 #endif
 
-float targetTemp = INITIAL_TARGET_TEMP;
 float currentTemp = 0.0;
-elapsedMillis timeElapsed = 0;
+unsigned long nextUpdate = 0;
+
+#ifdef ENABLE_PRESENCE_DETECTION
+  uint8_t currentPresenceState = LOW;
+  uint8_t previousPresenceState = LOW;
+  unsigned long presenceCooldown = 0;
+#endif
 
 void setup() {
   if(LOG_LEVEL == 0) {
@@ -102,6 +105,10 @@ void setup() {
     control.setFanLedPin(FAN_LED_PIN);
   #endif
 
+  #ifdef ENABLE_PRESENCE_DETECTION
+    pinMode(PRESENCE_PIN, INPUT);
+  #endif
+
   logln("Setup complete");
 }
 
@@ -117,7 +124,22 @@ void loop() {
     downButton.tick();
   #endif
 
-  if (timeElapsed > UPDATE_INTERVAL) {
+  #ifdef ENABLE_PRESENCE_DETECTION
+    currentPresenceState = digitalRead(PRESENCE_PIN);
+
+    if(currentPresenceState == HIGH) {
+      presenceCooldown = millis() + PRESENCE_COOLDOWN;
+      if(previousPresenceState == LOW) {
+        control.setPresence(true);
+      }
+    } else if(millis() > presenceCooldown && previousPresenceState == HIGH) {
+      control.setPresence(false);
+    }
+
+    previousPresenceState = currentPresenceState;
+  #endif
+
+  if(millis() > nextUpdate) {
     currentTemp = readTemperature();
 
     control.updateCurrentTemp(currentTemp);
@@ -126,7 +148,7 @@ void loop() {
       updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentMainModeName());
     #endif
 
-    timeElapsed = 0;
+    nextUpdate = millis() + UPDATE_INTERVAL;
   }
 
   #ifdef ENABLE_DISPLAY
