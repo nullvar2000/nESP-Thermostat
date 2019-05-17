@@ -1,63 +1,69 @@
-#include "userConfig.h"
+#ifndef TEMPERATURESENSOR_H
+  #define TEMPERATURESENSOR_H
 
-#define READINGS_TO_COMPUTE_MEAN 6
+  #include "userConfig.h"
 
-class BaseTemperatureSensor {
-  public:
-    virtual float readTemperature() = 0;
+  #define READINGS_TO_COMPUTE_MEAN 6
 
-    void setOffset(float offset) {
-      _offset = offset;
-    }
-    float getOffset() {
-      return _offset;
-    }
+  class BaseTemperatureSensor {
+    public:
+      virtual float readTemperature() = 0;
 
-    void setUseFahrenheit(bool useFahrenheit) {
-      _useFahrenheit = useFahrenheit;
-    }
-    bool getUseFahrenheit() {
-      return _useFahrenheit;
-    }
+      void setOffset(float offset) {
+        _offset = offset;
+      }
+      float getOffset() {
+        return _offset;
+      }
 
-  protected:
-    bool _useFahrenheit;
-    float _offset;
-    float _readings[READINGS_TO_COMPUTE_MEAN];
-    uint8_t _previousIndex = 255;
+      void setUseFahrenheit(bool useFahrenheit) {
+        _useFahrenheit = useFahrenheit;
+      }
+      bool getUseFahrenheit() {
+        return _useFahrenheit;
+      }
 
-    float calculateTemperature(float currentReading) {
-      // first reading only
-      if(_previousIndex == 255) {
-        for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
-          _readings[i] = currentReading;
+    protected:
+      bool _useFahrenheit;
+      float _offset;
+      float _readings[READINGS_TO_COMPUTE_MEAN];
+      uint8_t _previousIndex = 255;
+
+      float calculateTemperature(float currentReading) {
+        // first reading only
+        if(_previousIndex == 255) {
+          for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
+            _readings[i] = currentReading;
+          }
+
+          _previousIndex = 0;
+
+          return currentReading;
         }
 
-        _previousIndex = 0;
+        float sum = 0.0;
 
-        return currentReading;
+        if(++_previousIndex >= READINGS_TO_COMPUTE_MEAN) {
+          _previousIndex = 0;
+        }
+
+        _readings[_previousIndex] = currentReading;
+
+        for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
+          sum += _readings[i];
+        }
+
+        return sum / READINGS_TO_COMPUTE_MEAN;
       }
+  };
 
-      float sum = 0.0;
+  #ifdef USE_BMP280
+    #include "Sensor-BMP280.h"
+  #endif
 
-      if(++_previousIndex >= READINGS_TO_COMPUTE_MEAN) {
-        _previousIndex = 0;
-      }
+  #ifdef USE_DHT11
+    #include "Sensor-DHT.h"
 
-      for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
-        sum += _readings[i];
-      }
+  #endif
 
-      return sum / READINGS_TO_COMPUTE_MEAN;
-    }
-};
-
-#ifdef USE_BMP280
-  #include "Sensor-BMP280.h"
 #endif
-
-#ifdef USE_DHT11
-  #include "Sensor-DHT.h"
-
-#endif
-

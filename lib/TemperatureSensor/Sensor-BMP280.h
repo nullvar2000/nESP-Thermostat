@@ -3,25 +3,24 @@
 
 #include "userConfig.h"
 
-Adafruit_BMP280 bmp(TEMP_SENSOR_PIN); // VSPI
-float tempOffset = 0.0;
+class TemperatureSensor : public BaseTemperatureSensor {
+    public:
+        TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(pin) {
+            _useFahrenheit = useFahrenheit;
+            _offset = offset;
+            
+            sensor.begin();
+            delay(5000);
+        }
+    
+        float readTemperature() {
+            if(_useFahrenheit) {
+                return (calculateTemperature(sensor.readTemperature(true) * 9 / 5) + 32 + _offset);
+            } else {
+                return calculateTemperature(sensor.readTemperature() + _offset);
+            }
+        }
 
-bool initSensor() {
-    if(!bmp.begin()) {
-        return false;
-    }
-    return true;
-}
-
-float readTemperature() {
-    #ifdef USE_FAHRENHEIT
-        return (bmp.readTemperature() * 9 / 5) + 32 + tempOffset;
-    #else
-        return bmp.readTemperature() + tempOffset;
-    #endif
-}
-
-void setOffset(float offset) {
-    tempOffset = offset;
-}
-
+    private:
+        Adafruit_BMP280 sensor;
+};
