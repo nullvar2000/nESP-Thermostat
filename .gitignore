@@ -3,3 +3,5 @@
 .piolibdeps
 .vscode
 .travis.yml
+.clang_complete
+.gcc-flags.json

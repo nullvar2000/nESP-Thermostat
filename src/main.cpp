@@ -19,9 +19,9 @@
 #endif
 
 #ifdef HEATPUMP_HVAC_TYPE
-  ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, EPin, AuxPin, GPin, OBPin, YPin);
+  ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #elif CONVENTIONAL_HVAC_TYPE
-  ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, EPin, AuxPin, GPin, OBPin, YPin);
+  ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #endif
 
 #ifdef ENABLE_BUTTONS
@@ -145,7 +145,7 @@ void loop() {
     control.updateCurrentTemp(currentTemp);
 
     #ifdef ENABLE_MQTT
-      updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentMainModeName());
+      updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentActiveModeName());
     #endif
 
     nextUpdate = millis() + UPDATE_INTERVAL;
