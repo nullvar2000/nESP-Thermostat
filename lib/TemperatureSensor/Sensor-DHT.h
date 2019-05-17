@@ -2,34 +2,26 @@
 #include <DHT.h>
 
 #include "userConfig.h"
-#include "Logger.h"
 
-#ifdef USE_DHT11
-    DHT dht(TEMP_SENSOR_PIN, DHT11);
-#elif USE_DHT21
-    DHT dht(TEMP_SENSOR_PIN, DHT21);
-#elif USE_DHT22
-    DHT dht(TEMP_SENSOR_PIN, DHT22);
-#endif
+class TemperatureSensor : public BaseTemperatureSensor {
+    public:
+        TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(pin, DHT11) {
+            _useFahrenheit = useFahrenheit;
+            _offset = offset;
+            
+            sensor.begin();
+            delay(5000);
+        }
+    
+        float readTemperature() {
+            if(_useFahrenheit) {
+                return calculateTemperature(sensor.readTemperature(true) + _offset);
+            } else {
+                return calculateTemperature(sensor.readTemperature() + _offset);
+            }
+        }
 
-float tempOffset = 0.0;
-
-void initSensor() {
-    logln("Initializing DHT sensor");
-    dht.begin();
-    delay(5000);
-    logln("Complete");
-}
-
-float readTemperature() {
-    #ifdef USE_FAHRENHEIT
-        return dht.readTemperature(true) + tempOffset;
-    #else
-        return dht.readTemperature() + tempOffset;
-    #endif
-}
-
-void setOffset(float offset) {
-    tempOffset = offset;
-}
+    private:
+        DHT sensor;
+};
 

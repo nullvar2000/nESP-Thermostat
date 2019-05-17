@@ -26,6 +26,7 @@ All of these are available through the Platformio library management.
   - JSON for state updates
   - Configure conventional HVAC switches
   - Configure web interface
+  - Add Fahrenheit/Celsius, swing, and temperature reading offset to config
   - Improve logging
   - Add more sensors/displays
   - Add libs to platformio.ini

@@ -46,6 +46,7 @@
   }
 #endif
 
+TemperatureSensor tempSensor(TEMP_SENSOR_PIN, USE_FAHRENHEIT, 0.0);
 float currentTemp = 0.0;
 unsigned long nextUpdate = 0;
 
@@ -61,8 +62,6 @@ void setup() {
   }
   
   logln("Setting up");
-
-  initSensor();
   
   #ifdef ENABLE_WIFI
     initIoTWC(&control);
@@ -140,7 +139,7 @@ void loop() {
   #endif
 
   if(millis() > nextUpdate) {
-    currentTemp = readTemperature();
+    currentTemp = tempSensor.readTemperature();
 
     control.updateCurrentTemp(currentTemp);
 

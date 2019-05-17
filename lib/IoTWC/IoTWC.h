@@ -3,6 +3,7 @@
 
     #include "userConfig.h"
     #include "ThermostatControl.h"
+    #include "TemperatureSensor.h"
     #include <IotWebConf.h>
     #include <ArduinoJson.h>
 
@@ -19,6 +20,8 @@
         #define MODE_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/mode/set"
         #define SWING_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/swing/state"
         #define SWING_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/swing/set"
+        #define OFFSET_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/offset/state"
+        #define OFFSET_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/offset/set"
         #define PRESENCE_STATE_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/presence/state"
         #define PRESENCE_COMMAND_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/presence/set"
         #define SUBSCRIPTION_TOPIC MQTT_PREFIX THERMOSTAT_NAME "/+/set"
@@ -54,6 +57,7 @@
     IotWebConf iotWebConf(THERMOSTAT_NAME, &dnsServer, &server, WIFI_INITIAL_PASSWORD, CONFIG_VERSION);
 
     ThermostatControl* _control;
+    TemperatureSensor* _tempSensor;
 
     #ifdef ENABLE_MQTT
         IotWebConfParameter mqttServerParam = IotWebConfParameter("MQTT server", "mqttServer", mqttServerValue, STRING_LEN);
@@ -282,6 +286,16 @@
                 _control->setPresence(false);
                 mqttClient.publish(PRESENCE_STATE_TOPIC, "false");
             }
+        }  else if(topic.equals(SWING_COMMAND_TOPIC)) {
+            _control->setSwing(payload.toFloat());
+            char buf[8];
+    		dtostrf(_control->getSwing(), 4, 1, buf);
+	    	mqttClient.publish(SWING_STATE_TOPIC, buf);
+        }  else if(topic.equals(OFFSET_COMMAND_TOPIC)) {
+            _tempSensor->setOffset(payload.toFloat());
+            char buf[8];
+    		dtostrf(_tempSensor->getOffset(), 4, 1, buf);
+	    	mqttClient.publish(OFFSET_STATE_TOPIC, buf);
         }
     }
 #endif
