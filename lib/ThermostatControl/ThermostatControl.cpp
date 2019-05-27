@@ -279,15 +279,17 @@ char* ThermostatControl::updateCurrentTemp(float current) {
   } else if(currentMainMode == MAIN_FAN) {
     activate(FAN_MODE);
   } else if(currentMainMode == MAIN_AUTO) {
-    if(currentTemp < targetTemp - AUTO_SWING) {
+    if(currentTemp < targetTemp - calculateSwing()) {
       if(currentTemp < targetTemp - SECOND_STAGE_DIFFERENCE) {
         activate(SS_HEAT_MODE);
       } else {
         activate(HEAT_MODE);
       }
-    } else if(currentTemp > targetTemp + AUTO_SWING) {
+    } else if(currentTemp > targetTemp + calculateSwing()) {
       activate(COOL_MODE);
-    } else {
+    } else if(currentActiveMode == COOL_MODE && currentTemp < targetTemp) {
+      deactivate();
+    } else if((currentActiveMode == HEAT_MODE || currentActiveMode == SS_HEAT_MODE) && currentTemp > targetTemp) {
       deactivate();
     }
   } else if(currentMainMode == MAIN_COOL) {
@@ -307,7 +309,7 @@ char* ThermostatControl::updateCurrentTemp(float current) {
   
   // turn off fan after trailing time
   if(currentMainMode != MAIN_FAN && currentActiveMode == FAN_MODE && millis() > lastOffTime + FAN_TRAIL) {
-    digitalWrite(gPin, LOW);
+    digitalWrite(gPin, OFF);
     currentActiveMode = OFF_MODE;
 
     if(fanLedPin != DISABLED_LED) {
@@ -340,10 +342,16 @@ void ThermostatControl::setFanLedPin(uint8_t pin) {
 }
 
 float ThermostatControl::calculateSwing() {
+  uint8_t additionalSwing = 0.0;
+
   if(presenceDetected) {
-    return swing;
+    additionalSwing = PRESENCE_SWING;
+  }
+
+  if(currentMainMode == MAIN_AUTO) {
+    return AUTO_SWING + additionalSwing;
   } else {
-    return swing + PRESENCE_SWING;
+    return swing + additionalSwing;
   }
 }
 

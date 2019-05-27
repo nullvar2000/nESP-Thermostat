@@ -228,7 +228,7 @@
             
             serializeJson(doc, buf, sizeof(buf));
 
-            mqttClient.publish(HA_DISCOVERY_TOPIC, buf);
+            mqttClient.publish(HA_DISCOVERY_TOPIC, buf, true, 1);
         #endif
 
         mqttClient.publish(AVAILABILITY_STATE_TOPIC, "online", true, 0);
