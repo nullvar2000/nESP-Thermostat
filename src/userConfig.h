@@ -8,7 +8,7 @@
     #define ENABLE_WIFI
     #define THERMOSTAT_NAME "nESP" // must be unique if you have more than one on your network
     #define WIFI_INITIAL_PASSWORD "Pa55word!2"
-    #define RESET_PASSWORD_BUTTON 15
+    #define RESET_PASSWORD_BUTTON 34
 
     #define ENABLE_MQTT
     #define MQTT_PREFIX "home/thermostat/" 
@@ -66,29 +66,31 @@
     /* ============================================================================
     * Select the temperature sensor and pin
     * ==========================================================================*/
-    //#define USE_BMP280
-    #define USE_DHT11
+    #define USE_BMP280
+    //#define USE_DHT11
 
-    #define TEMP_SENSOR_PIN 4
+    #define TEMP_SENSOR_ONE_WIRE 21
+    #define TEMP_SENSOR_SDA 21
+    #define TEMP_SENSOR_SCL 22
 
     /* ============================================================================
     * Enable buttons and set pins
     * ==========================================================================*/
     #define ENABLE_BUTTONS
 
-    #define MODE_BUTTON_PIN 16
-    #define UP_BUTTON_PIN 17
-    #define DOWN_BUTTON_PIN 18
+    #define MODE_BUTTON_PIN 35
+    #define UP_BUTTON_PIN 36
+    #define DOWN_BUTTON_PIN 39
 
     /* ============================================================================
     * Enable LEDs and set pins
     * ==========================================================================*/
     #define ENABLE_LEDS
 
-    #define STATUS_LED_PIN 19
-    #define FAN_LED_PIN 19
-    #define COOL_LED_PIN 20 
-    #define HEAT_LED_PIN 23
+    #define STATUS_LED_PIN 12
+    #define FAN_LED_PIN 13
+    #define COOL_LED_PIN 14 
+    #define HEAT_LED_PIN 15
 
     /* ============================================================================
     * Enable display 
@@ -116,7 +118,7 @@
     * ==========================================================================*/
     #define ENABLE_PRESENCE_DETECTION
     
-    #define PRESENCE_PIN 5
+    #define PRESENCE_PIN 16
     #define PRESENCE_COOLDOWN 1800000
 
     /* ============================================================================

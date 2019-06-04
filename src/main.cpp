@@ -46,7 +46,7 @@
   }
 #endif
 
-TemperatureSensor tempSensor(TEMP_SENSOR_PIN, USE_FAHRENHEIT, 0.0);
+TemperatureSensor tempSensor(TEMP_SENSOR_ONE_WIRE, USE_FAHRENHEIT, 0.0);
 float currentTemp = 0.0;
 unsigned long nextUpdate = 0;
 

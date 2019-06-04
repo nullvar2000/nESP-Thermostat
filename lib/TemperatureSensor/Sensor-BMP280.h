@@ -5,17 +5,18 @@
 
 class TemperatureSensor : public BaseTemperatureSensor {
     public:
-        TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(pin) {
+        TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) {
+            // pin is not used, only included for conformity
             _useFahrenheit = useFahrenheit;
             _offset = offset;
             
             sensor.begin();
-            delay(5000);
+            delay(2000);
         }
     
         float readTemperature() {
             if(_useFahrenheit) {
-                return (calculateTemperature(sensor.readTemperature(true) * 9 / 5) + 32 + _offset);
+                return ((calculateTemperature(sensor.readTemperature()) * 9 / 5) + 32 + _offset);
             } else {
                 return calculateTemperature(sensor.readTemperature() + _offset);
             }
