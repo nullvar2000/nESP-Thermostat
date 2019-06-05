@@ -97,7 +97,8 @@
     * Select display type and set pins
     * ==========================================================================*/
     #define ENABLE_DISPLAY
-    #define USE_SSD1306
+    //#define USE_SSD1306
+    #define USE_ILI9341
 
     #define I2C_SDA 21
     #define I2C_SCL 22

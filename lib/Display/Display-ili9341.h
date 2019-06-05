@@ -4,32 +4,34 @@
     #include <TFT_eSPI.h>
 
     #include "userConfig.h"
+    #include "ThermostatControl.h"
 
     class Display : public BaseDisplay {
         public:
-            Display() {
-                display.init();
-                display.setRotation(3);
-                display.setTextColor(TFT_CYAN);
-                display.setTextSize(1);
+            Display(ThermostatControl* thermostatControl) {
+                _control = thermostatControl;
+                _display.init();
+                _display.setRotation(3);
+                _display.setTextColor(TFT_CYAN);
+                _display.setTextSize(1);
             }
         
-            void loop(float ctemp, float ttemp, char* cmode, char* amode) {
-                display.fillScreen(TFT_DARKGREY);
-                display.setCursor(0,0);
+            void loop() {
+                _display.fillScreen(TFT_DARKGREY);
+                _display.setCursor(0,0);
 
-                display.print("Current Temp: ");
-                display.println(ctemp);
-                display.print("Target Temp: ");
-                display.println(ttemp);
-                display.print("Current Mode: ");
-                display.println(cmode);
-                display.print("Active Mode: ");
-                display.println(amode);
+                _display.print("Current Temp: ");
+                _display.println(_control->getCurrentTemp());
+                _display.print("Target Temp: ");
+                _display.println(_control->getTargetTemp());
+                _display.print("Current Mode: ");
+                _display.println(_control->getCurrentMainModeDisplay());
+                _display.print("Active Mode: ");
+                _display.println(_control->getCurrentActiveModeDisplay());
             }
 
         private:
-            TFT_eSPI display = TFT_eSPI();
+            TFT_eSPI _display = TFT_eSPI();
     };
 
 #endif

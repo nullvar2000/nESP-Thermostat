@@ -65,7 +65,10 @@
       void setSwing(float newSwing);
       bool getPresence();
       void setPresence(bool presence);
+      float getCurrentTemp();
 
+      char* updateCurrentTemp(float current);
+      
       void getEnabledModeNames(char * names);
       char* getCurrentMainModeName();
       char* getCurrentActiveModeName();
@@ -74,7 +77,6 @@
 
       char* rotateMode();
       char* changeMode(const char *modeName);
-      char* updateCurrentTemp(float current);
       void disableMode(uint8_t modeIndex);
 
       void setHeatLedPin(uint8_t pin);

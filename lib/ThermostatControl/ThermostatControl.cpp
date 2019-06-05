@@ -213,6 +213,10 @@ void ThermostatControl::setPresence(bool presence) {
   presenceDetected = presence;
 }
 
+float ThermostatControl::getCurrentTemp() {
+  return currentTemp;
+}
+
 void ThermostatControl::getEnabledModeNames(char * names) {
   for(int i = 0; i < NUMBER_OF_MAIN_MODES; i++) {
     if(!mainModes[i].enabled) {

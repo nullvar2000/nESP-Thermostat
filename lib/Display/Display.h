@@ -1,6 +1,22 @@
-#include "userConfig.h"
+#ifndef DISPLAY_H
+  #define DISPLAY_H
 
-#ifdef USE_SSD1306
-  #include "Display-ssd1306.h"
+  #include "userConfig.h"
+
+  class BaseDisplay {
+      public:
+        virtual void loop() = 0;
+
+      protected:
+        ThermostatControl* _control;
+    };
+
+  #ifdef USE_SSD1306
+    #include "Display-ssd1306.h"
+  #endif
+
+  #ifdef USE_ILI9341
+    #include "Display-ili9341.h"
+  #endif
+
 #endif
-

@@ -2,6 +2,7 @@
 
 #include "ThermostatControl.h"
 #include "TemperatureSensor.h"
+#include "Display.h"
 #include "Logger.h"
 
 #define VERSION 0.1
@@ -22,6 +23,10 @@
   ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #elif CONVENTIONAL_HVAC_TYPE
   ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
+#endif
+
+#ifdef ENABLE_DISPLAY
+  Display display(&control);
 #endif
 
 #ifdef ENABLE_BUTTONS
@@ -73,10 +78,6 @@ void setup() {
     upButton.attachClick(upButtonPress);
     downButton.attachClick(downButtonPress);
     logln("Complete");
-  #endif
-
-  #ifdef ENABLE_DISPLAY
-    initDisplay();
   #endif
 
   #ifdef DISABLE_OFF
@@ -151,7 +152,7 @@ void loop() {
   }
 
   #ifdef ENABLE_DISPLAY
-    updateDisplay(currentTemp, control.getTargetTemp(), control.getCurrentMainModeDisplay(), control.getCurrentActiveModeDisplay());
+    display.loop();
   #endif
 }
 
