@@ -15,7 +15,7 @@
     #include "Display-ssd1306.h"
   #endif
 
-  #ifdef USE_ILI9341
+  #ifdef USE_TFT_eSPI
     #include "Display-ili9341.h"
   #endif
 

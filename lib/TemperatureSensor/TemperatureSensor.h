@@ -57,7 +57,7 @@
       }
   };
 
-  #ifdef USE_BMP280
+  #if defined USE_BMP280_I2C || defined USE_BMP280_VSPI || defined USE_BMP280_HSPI
     #include "Sensor-BMP280.h"
   #endif
 

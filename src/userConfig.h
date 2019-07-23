@@ -20,6 +20,7 @@
     * ==========================================================================*/
     #define HEATPUMP_HVAC_TYPE 0 
     //#define CONVENTIONAL_HVAC_TYPE 1
+    //#defie GENERIC_HVAC_TYPE 3
 
     #ifdef HEATPUMP_HVAC_TYPE
         #define EPin 255 // emergency heat
@@ -30,7 +31,7 @@
         #define LPin 255
 
         // change to false if your reversing valve is powered for heating (B wire)
-        #define REVERSING_VALVE_POWERED_FOR_COOLING  true// O wire
+        #define REVERSING_VALVE_POWERED_FOR_COOLING  true // O wire
     #endif
 
     // not working yet
@@ -41,6 +42,12 @@
         #define GPin 25 // fan
         #define Y2Pin 26 // 2nd stage compressor
         #define YPin 27 // compressor
+    #endif
+
+    #ifdef GENERIC_HVAC_TYPE
+        #define HEAT_PIN 27
+        #define COOL_PIN 32
+        #define FAN_PIN 33
     #endif
 
     /* ============================================================================
@@ -66,17 +73,18 @@
     /* ============================================================================
     * Select the temperature sensor and pin
     * ==========================================================================*/
-    #define USE_BMP280
-    //#define USE_DHT11
+    //#define USE_BMP280_I2C
+    //#define USE_BMP280_VSPI
+    //#define USE_BMP280_HSPI
+    #define USE_DHT11
 
-    #define TEMP_SENSOR_ONE_WIRE 21
-    #define TEMP_SENSOR_SDA 21
-    #define TEMP_SENSOR_SCL 22
+    // SPI CS pin or data pin for one wire sensors, ignored for I2C
+    #define TEMP_SENSOR_PIN 13
 
     /* ============================================================================
     * Enable buttons and set pins
     * ==========================================================================*/
-    #define ENABLE_BUTTONS
+    //#define ENABLE_BUTTONS
 
     #define MODE_BUTTON_PIN 35
     #define UP_BUTTON_PIN 36
@@ -85,7 +93,7 @@
     /* ============================================================================
     * Enable LEDs and set pins
     * ==========================================================================*/
-    #define ENABLE_LEDS
+    //#define ENABLE_LEDS
 
     #define STATUS_LED_PIN 12
     #define FAN_LED_PIN 13
@@ -98,37 +106,35 @@
     * ==========================================================================*/
     #define ENABLE_DISPLAY
     //#define USE_SSD1306
-    #define USE_ILI9341
+    #define USE_TFT_eSPI // settings defined in TFT_eSPI User_Setup.h
+
+    /* ============================================================================
+    * Enable presence detection 
+    * Set pin
+    * ==========================================================================*/
+    //#define ENABLE_PRESENCE_DETECTION
+    
+    #define PRESENCE_PIN 16
+    #define PRESENCE_COOLDOWN 1800000
+
+    /* ============================================================================
+    * Various other settings
+    * ==========================================================================*/
+    #define LOG_LEVEL 0 
+
+    #define UPDATE_INTERVAL 10000
+
+    #define BAUD_RATE 115200
 
     #define I2C_SDA 21
     #define I2C_SCL 22
 
     #define HSPI_SCLK 14
     #define HSPI_MISO 12
-    #define HSPI_MOSI 13 // SDA
-    #define HSPI_CS 15
+    #define HSPI_MOSI 13
 
     #define VSPI_SCLK 18
     #define VSPI_MISO 19
-    #define VSPI_MOSI 23 // SDA
-    #define VSPI_CS 5
-
-    /* ============================================================================
-    * Enable presence detection 
-    * Set pin
-    * ==========================================================================*/
-    #define ENABLE_PRESENCE_DETECTION
-    
-    #define PRESENCE_PIN 16
-    #define PRESENCE_COOLDOWN 1800000
-
-    /* ============================================================================
-    * Various optional settings
-    * ==========================================================================*/
-    #define LOG_LEVEL 0 
-
-    #define UPDATE_INTERVAL 10000
-
-    #define BAUD_RATE 9600
+    #define VSPI_MOSI 23
 
 #endif

@@ -42,7 +42,7 @@
         MQTTClient mqttClient(512);
     #endif
 
-    #define CONFIG_VERSION "iotwc0.1"
+    #define CONFIG_VERSION "iotwc0.2"
 
     bool needReset = false;
     void wifiConnected();

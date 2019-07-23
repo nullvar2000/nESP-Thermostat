@@ -2,7 +2,6 @@
 
 #include "ThermostatControl.h"
 #include "TemperatureSensor.h"
-#include "Display.h"
 #include "Logger.h"
 
 #define VERSION 0.1
@@ -11,55 +10,31 @@
   #include "IoTWC.h"
 #endif
 
-#ifdef ENABLE_BUTTONS
-  #include <OneButton.h>
-#endif
-
-#ifdef ENABLE_DISPLAY
-  #include "Display.h"
-#endif
-
 #ifdef HEATPUMP_HVAC_TYPE
   ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #elif CONVENTIONAL_HVAC_TYPE
   ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #endif
 
+#ifdef ENABLE_BUTTONS
+  #include "Buttons.h"
+  Buttons buttons(&control);
+#endif
+
 #ifdef ENABLE_DISPLAY
+  #include "Display.h"
   Display display(&control);
 #endif
-
-#ifdef ENABLE_BUTTONS
-  OneButton modeButton(MODE_BUTTON_PIN, true);
-  OneButton upButton(UP_BUTTON_PIN, true);
-  OneButton downButton(DOWN_BUTTON_PIN, true);
-
-  void modeButtonPress() {
-    control.rotateMode();
-  }
-
-  void upButtonPress() {
-    float targetTemp = control.getTargetTemp();
-    targetTemp += INCREMENT_TEMP_STEP;
-    control.setTargetTemp(targetTemp);
-  }
-
-  void downButtonPress() {
-    float targetTemp = control.getTargetTemp();
-    targetTemp -= INCREMENT_TEMP_STEP;
-    control.setTargetTemp(targetTemp);
-  }
-#endif
-
-TemperatureSensor tempSensor(TEMP_SENSOR_ONE_WIRE, USE_FAHRENHEIT, 0.0);
-float currentTemp = 0.0;
-unsigned long nextUpdate = 0;
 
 #ifdef ENABLE_PRESENCE_DETECTION
   uint8_t currentPresenceState = LOW;
   uint8_t previousPresenceState = LOW;
   unsigned long presenceCooldown = 0;
 #endif
+
+TemperatureSensor tempSensor(TEMP_SENSOR_PIN, USE_FAHRENHEIT, 0.0);
+float currentTemp = 0.0;
+unsigned long nextUpdate = 0;
 
 void setup() {
   if(LOG_LEVEL == 0) {
@@ -70,14 +45,6 @@ void setup() {
   
   #ifdef ENABLE_WIFI
     initIoTWC(&control);
-  #endif
-
-  #ifdef ENABLE_BUTTONS
-    logln("Initializing buttons");
-    modeButton.attachClick(modeButtonPress);
-    upButton.attachClick(upButtonPress);
-    downButton.attachClick(downButtonPress);
-    logln("Complete");
   #endif
 
   #ifdef DISABLE_OFF
@@ -119,9 +86,7 @@ void loop() {
   #endif
 
   #ifdef ENABLE_BUTTONS
-    modeButton.tick();
-    upButton.tick();
-    downButton.tick();
+    buttons.loop();
   #endif
 
   #ifdef ENABLE_PRESENCE_DETECTION
@@ -142,6 +107,8 @@ void loop() {
   if(millis() > nextUpdate) {
     currentTemp = tempSensor.readTemperature();
 
+    Serial.println(currentTemp);
+
     control.updateCurrentTemp(currentTemp);
 
     #ifdef ENABLE_MQTT
@@ -149,12 +116,10 @@ void loop() {
     #endif
 
     nextUpdate = millis() + UPDATE_INTERVAL;
+
+    #ifdef ENABLE_DISPLAY
+      display.loop();
+    #endif
   }
-
-  #ifdef ENABLE_DISPLAY
-    display.loop();
-  #endif
 }
-
-
 
