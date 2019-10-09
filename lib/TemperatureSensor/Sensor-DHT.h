@@ -5,8 +5,8 @@
 
 class TemperatureSensor : public BaseTemperatureSensor {
     public:
-        TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(pin, DHT11) {
-            _useFahrenheit = useFahrenheit;
+        TemperatureSensor(uint8_t pin, float offset) : sensor(pin, DHT11) {
+            _useFahrenheit = false;
             _offset = offset;
             
             sensor.begin();

@@ -12,6 +12,7 @@
       void setOffset(float offset) {
         _offset = offset;
       }
+      
       float getOffset() {
         return _offset;
       }
@@ -19,6 +20,7 @@
       void setUseFahrenheit(bool useFahrenheit) {
         _useFahrenheit = useFahrenheit;
       }
+
       bool getUseFahrenheit() {
         return _useFahrenheit;
       }

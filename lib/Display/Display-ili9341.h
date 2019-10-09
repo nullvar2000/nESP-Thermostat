@@ -15,7 +15,7 @@
             Display(ThermostatControl* thermostatControl) {
                 _control = thermostatControl;
                 _display.init();
-                _display.setRotation(3);
+                _display.setRotation(1);
 
                 //touch_calibrate();
 

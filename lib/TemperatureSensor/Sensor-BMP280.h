@@ -6,9 +6,9 @@
 class TemperatureSensor : public BaseTemperatureSensor {
     public:
         #if defined USE_BMP280_I2C
-            TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) {
+            TemperatureSensor(uint8_t pin, float offset) {
                 // pin is not used, only included for conformity
-                _useFahrenheit = useFahrenheit;
+                _useFahrenheit = false;
                 _offset = offset;
                 
                 sensor.begin();
@@ -17,9 +17,9 @@ class TemperatureSensor : public BaseTemperatureSensor {
         #endif
 
         #if defined USE_BMP280_HSPI
-            TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(TEMP_SENSOR_PIN, HSPI_MOSI, HSPI_MISO, HSPI_SCLK) {
+            TemperatureSensor(uint8_t pin, float offset) : sensor(TEMP_SENSOR_PIN, HSPI_MOSI, HSPI_MISO, HSPI_SCLK) {
                 // pin is not used, only included for conformity
-                _useFahrenheit = useFahrenheit;
+                _useFahrenheit = false;
                 _offset = offset;
                 
                 sensor.begin();
@@ -28,9 +28,9 @@ class TemperatureSensor : public BaseTemperatureSensor {
         #endif
 
         #if defined USE_BMP280_VSPI
-            TemperatureSensor(uint8_t pin, bool useFahrenheit, float offset) : sensor(TEMP_SENSOR_PIN, VSPI_MOSI, VSPI_MISO, VSPI_SCLK) {
+            TemperatureSensor(uint8_t pin, float offset) : sensor(TEMP_SENSOR_PIN, VSPI_MOSI, VSPI_MISO, VSPI_SCLK) {
                 // pin is not used, only included for conformity
-                _useFahrenheit = useFahrenheit;
+                _useFahrenheit = false;
                 _offset = offset;
                 
                 sensor.begin();

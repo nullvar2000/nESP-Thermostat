@@ -32,7 +32,7 @@
   unsigned long presenceCooldown = 0;
 #endif
 
-TemperatureSensor tempSensor(TEMP_SENSOR_PIN, USE_FAHRENHEIT, 0.0);
+TemperatureSensor tempSensor(TEMP_SENSOR_PIN, 0.0);
 float currentTemp = 0.0;
 unsigned long nextUpdate = 0;
 
@@ -76,6 +76,8 @@ void setup() {
     pinMode(PRESENCE_PIN, INPUT);
   #endif
 
+  tempSensor.setUseFahrenheit(USE_FAHRENHEIT);
+  
   logln("Setup complete");
 }
 
