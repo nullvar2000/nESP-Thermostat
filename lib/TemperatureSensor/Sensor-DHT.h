@@ -1,7 +1,7 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-#include "userConfig.h"
+#include "Config.h"
 
 class TemperatureSensor : public BaseTemperatureSensor {
     public:

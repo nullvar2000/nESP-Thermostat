@@ -248,6 +248,10 @@ char* ThermostatControl::getCurrentActiveModeDisplay() {
   return activeModes[currentActiveMode].display;
 }
 
+uint8_t ThermostatControl::getCurrentMainMode() {
+  return currentMainMode;
+}
+
 char* ThermostatControl::rotateMode() {
   do {
     currentMainMode++;
@@ -270,6 +274,15 @@ char* ThermostatControl::changeMode(const char *modeName) {
   }
 
   currentActiveMode = deactivate();
+
+  return mainModes[currentMainMode].name;
+}
+
+char* ThermostatControl::changeMode(uint8_t mode) {
+  if(mode >= 0 && mode < NUMBER_OF_MAIN_MODES && mainModes[mode].enabled) {
+    currentMainMode = mode;
+    currentActiveMode = deactivate();
+  }
 
   return mainModes[currentMainMode].name;
 }

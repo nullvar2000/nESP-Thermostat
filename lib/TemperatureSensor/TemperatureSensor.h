@@ -1,7 +1,7 @@
 #ifndef TEMPERATURESENSOR_H
   #define TEMPERATURESENSOR_H
 
-  #include "userConfig.h"
+  #include "Config.h"
 
   #define READINGS_TO_COMPUTE_MEAN 6
 

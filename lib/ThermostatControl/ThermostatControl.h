@@ -74,9 +74,11 @@
       char* getCurrentActiveModeName();
       char* getCurrentMainModeDisplay();
       char* getCurrentActiveModeDisplay();
+      uint8_t getCurrentMainMode();
 
       char* rotateMode();
       char* changeMode(const char *modeName);
+      char* changeMode(uint8_t mode);
       void disableMode(uint8_t modeIndex);
 
       void setHeatLedPin(uint8_t pin);

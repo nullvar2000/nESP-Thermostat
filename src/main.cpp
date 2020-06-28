@@ -1,4 +1,4 @@
-#include "userConfig.h"
+#include "Config.h"
 
 #include "ThermostatControl.h"
 #include "TemperatureSensor.h"
@@ -7,11 +7,11 @@
 #define VERSION 0.1
 
 #ifdef ENABLE_WIFI
-  #include "IoTWC.h"
+  #include "acWifi.h"
 #endif
 
 #ifdef HEATPUMP_HVAC_TYPE
-  ThermostatControl control(HEATPUMP_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
+  ThermostatControl control(HEATPUMP_HVAC_TYPE, true, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #elif CONVENTIONAL_HVAC_TYPE
   ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
 #endif
@@ -35,6 +35,8 @@
 TemperatureSensor tempSensor(TEMP_SENSOR_PIN, 0.0);
 float currentTemp = 0.0;
 unsigned long nextUpdate = 0;
+uint8_t minTemp = 60;
+uint8_t maxTemp = 80;
 
 void setup() {
   if(LOG_LEVEL == 0) {
@@ -44,7 +46,7 @@ void setup() {
   logln("Setting up");
   
   #ifdef ENABLE_WIFI
-    initIoTWC(&control);
+    setupWifi();
   #endif
 
   #ifdef DISABLE_OFF
@@ -76,7 +78,7 @@ void setup() {
     pinMode(PRESENCE_PIN, INPUT);
   #endif
 
-  tempSensor.setUseFahrenheit(USE_FAHRENHEIT);
+  tempSensor.setUseFahrenheit(true);
   
   logln("Setup complete");
 }
@@ -84,7 +86,7 @@ void setup() {
 void loop() {
 
   #ifdef ENABLE_WIFI
-    loopIoTWC();
+    loopWifi();
   #endif
 
   #ifdef ENABLE_BUTTONS
@@ -114,7 +116,7 @@ void loop() {
     control.updateCurrentTemp(currentTemp);
 
     #ifdef ENABLE_MQTT
-      updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentActiveModeName());
+      //updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentActiveModeName());
     #endif
 
     nextUpdate = millis() + UPDATE_INTERVAL;

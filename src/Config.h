@@ -1,19 +1,15 @@
-#ifndef USERCONFIG_H
-
-    #define USERCONFIG_H
+#ifndef CONFIG_H
+    #define CONFIG_H
 
     /* ============================================================================
     * Enable wifi and mqtt
     * ==========================================================================*/
     #define ENABLE_WIFI
-    #define THERMOSTAT_NAME "nESP" // must be unique if you have more than one on your network
-    #define WIFI_INITIAL_PASSWORD "Pa55word!2"
-    #define RESET_PASSWORD_BUTTON 34
+    #define INITIAL_HOSTNAME "nESP"
+    #define INITIAL_WIFI_PASSWORD "Pa55word!2"
 
-    #define ENABLE_MQTT
+    //#define ENABLE_MQTT
     #define MQTT_PREFIX "home/thermostat/" 
-    
-    #define ENABLE_HOME_ASSISTANT_DISCOVERY
     
     /* ============================================================================
     * Select the HVAC type and associated pins
@@ -58,7 +54,7 @@
     //#define DISABLE_AUTO 1
     //#define DISABLE_COOL 2
     //#define DISABLE_HEAT 3
-    #define DISABLE_EHEAT 4
+    //#define DISABLE_EHEAT 4
     //#define DISABLE_FAN_ONLY 5
 
     /* ============================================================================
@@ -66,10 +62,15 @@
     * Set USE_FAHRENHEIT to false to use celsius
     * Adjust others as needed
     * ==========================================================================*/
-    #define USE_FAHRENHEIT true
+    //#define USE_FAHRENHEIT true
 
-    #define INCREMENT_TEMP_STEP 1.0
-
+    #define INCREMENT_FAHRENHEIT_STEP 1.0
+    #define INCREMENT_CELSIUS_STEP 0.5
+    #define MAX_FAHRENHEIT_TARGET_TEMP 80
+    #define MIN_FAHRENHEIT_TARGET_TEMP 60
+    #define MAX_CELSIUS_TARGET_TEMP 30
+    #define MAX_CELSIUS_TARGET_TEMP 15
+    
     /* ============================================================================
     * Select the temperature sensor and pin
     * ==========================================================================*/
@@ -104,9 +105,9 @@
     * Enable display 
     * Select display type and set pins
     * ==========================================================================*/
-    #define ENABLE_DISPLAY
+    //#define ENABLE_DISPLAY
     //#define USE_SSD1306
-    #define USE_TFT_eSPI // settings defined in TFT_eSPI User_Setup.h
+    //#define USE_TFT_eSPI // settings defined in TFT_eSPI User_Setup.h
 
     /* ============================================================================
     * Enable presence detection 

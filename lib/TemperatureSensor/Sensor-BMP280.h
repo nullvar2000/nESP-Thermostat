@@ -1,7 +1,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
 
-#include "userConfig.h"
+#include "Config.h"
 
 class TemperatureSensor : public BaseTemperatureSensor {
     public:
