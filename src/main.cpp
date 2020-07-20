@@ -1,129 +1,83 @@
-#include "Config.h"
+#include <Arduino.h>
 
-#include "ThermostatControl.h"
-#include "TemperatureSensor.h"
-#include "Logger.h"
+#include "settings.h"
+#include "network.h"
+#include "mqtt.h"
+#include <TemperatureSensor.h>
+#include <ThermostatControl.h>
 
-#define VERSION 0.1
+#define NESP_UPDATE_INTERVAL 15000
+#define EPin 255 // emergency heat
+#define AuxPin 26 // 2nd stage heat
+#define GPin 27 // fan 
+#define OBPin 32 // reversing valve, set direction below
+#define YPin 33 // compressor
+#define LPin 255
 
-#ifdef ENABLE_WIFI
-  #include "acWifi.h"
-#endif
+// change to false if your reversing valve is powered for heating (B wire)
+#define REVERSING_VALVE_POWERED_FOR_COOLING  true // O wire
 
-#ifdef HEATPUMP_HVAC_TYPE
-  ThermostatControl control(HEATPUMP_HVAC_TYPE, true, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
-#elif CONVENTIONAL_HVAC_TYPE
-  ThermostatControl control(CONTENTIONAL_HVAC_TYPE, USE_FAHRENHEIT, REVERSING_VALVE_POWERED_FOR_COOLING, EPin, AuxPin, GPin, OBPin, YPin);
-#endif
+// give sensors time to settle
+unsigned long lastUpdate = millis(); 
+//float currentTemp;
+float targetTemp;
+uint8_t mode;
 
-#ifdef ENABLE_BUTTONS
-  #include "Buttons.h"
-  Buttons buttons(&control);
-#endif
-
-#ifdef ENABLE_DISPLAY
-  #include "Display.h"
-  Display display(&control);
-#endif
-
-#ifdef ENABLE_PRESENCE_DETECTION
-  uint8_t currentPresenceState = LOW;
-  uint8_t previousPresenceState = LOW;
-  unsigned long presenceCooldown = 0;
-#endif
-
-TemperatureSensor tempSensor(TEMP_SENSOR_PIN, 0.0);
-float currentTemp = 0.0;
-unsigned long nextUpdate = 0;
-uint8_t minTemp = 60;
-uint8_t maxTemp = 80;
+ThermostatControl control(EPin, AuxPin, GPin, OBPin, YPin, true);
 
 void setup() {
-  if(LOG_LEVEL == 0) {
-    Serial.begin(BAUD_RATE);
+  Serial.begin(115200);
+  
+  delay(1000);
+  
+  prefs.begin(NESP_SETTINGS_NAMESPACE, false);
+
+  loadSettings();
+  configNet();
+
+  if(configMQTT()) {
+    Serial.println("MQTT configured");
   }
-  
-  logln("Setting up");
-  
-  #ifdef ENABLE_WIFI
-    setupWifi();
-  #endif
 
-  #ifdef DISABLE_OFF
-    control.disableMode(DISABLE_OFF);
-  #endif
-  #ifdef DISABLE_AUTO
-    control.disableMode(DISABLE_AUTO);
-  #endif
-  #ifdef DISABLE_COOL
-    control.disableMode(DISABLE_COOL);
-  #endif
-  #ifdef DISABLE_HEAT
-    control.disableMode(DISABLE_HEAT);
-  #endif
-  #ifdef DISABLE_EHEAT
-    control.disableMode(DISABLE_EHEAT);
-  #endif
-  #ifdef DISABLE_FAN_ONLY
-    control.disableMode(DISABLE_FAN_ONLY);
-  #endif
+  configTempSensor();
 
-  #ifdef ENABLE_LEDS
-    control.setCoolLedPin(COOL_LED_PIN);
-    control.setHeatLedPin(HEAT_LED_PIN);
-    control.setFanLedPin(FAN_LED_PIN);
-  #endif
-
-  #ifdef ENABLE_PRESENCE_DETECTION
-    pinMode(PRESENCE_PIN, INPUT);
-  #endif
-
-  tempSensor.setUseFahrenheit(true);
-  
-  logln("Setup complete");
+  control.useFahrenheit(settings.useFahreheit);
+  control.setMinMaxTargetTemp(settings.minTemperature, settings.maxTemperature);
+  control.changeMode(mode);
+  control.setTargetTemp(targetTemp);
 }
 
 void loop() {
+  portal.handleClient();
+  handleMQTT();
 
-  #ifdef ENABLE_WIFI
-    loopWifi();
-  #endif
+  if(lastUpdate + NESP_UPDATE_INTERVAL < millis()) {
 
-  #ifdef ENABLE_BUTTONS
-    buttons.loop();
-  #endif
+    if(settings.sensor > 0) {
+      float currentTemp = getReadings();
 
-  #ifdef ENABLE_PRESENCE_DETECTION
-    currentPresenceState = digitalRead(PRESENCE_PIN);
+      control.updateCurrentTemp(currentTemp); 
 
-    if(currentPresenceState == HIGH) {
-      presenceCooldown = millis() + PRESENCE_COOLDOWN;
-      if(previousPresenceState == LOW) {
-        control.setPresence(true);
+      float updatedTargetTemp = control.getTargetTemp();
+
+      if(targetTemp != updatedTargetTemp) {
+        targetTemp = updatedTargetTemp;
+        saveTargetTemp();
       }
-    } else if(millis() > presenceCooldown && previousPresenceState == HIGH) {
-      control.setPresence(false);
+
+      uint8_t updatedMode = control.getCurrentMainMode();
+
+      if(mode != updatedMode) {
+        mode = updatedMode;
+        saveMode();
+      }
+
+      if(settings.mqtt.enabled) {
+        publishMQTT(currentTemp, targetTemp, control.getCurrentMainModeName(), control.getCurrentActiveModeName());
+      }
     }
 
-    previousPresenceState = currentPresenceState;
-  #endif
-
-  if(millis() > nextUpdate) {
-    currentTemp = tempSensor.readTemperature();
-
-    Serial.println(currentTemp);
-
-    control.updateCurrentTemp(currentTemp);
-
-    #ifdef ENABLE_MQTT
-      //updateMqtt(currentTemp, control.getTargetTemp(), control.getCurrentMainModeName(), control.getCurrentActiveModeName());
-    #endif
-
-    nextUpdate = millis() + UPDATE_INTERVAL;
-
-    #ifdef ENABLE_DISPLAY
-      display.loop();
-    #endif
+    lastUpdate = millis();
   }
 }
 

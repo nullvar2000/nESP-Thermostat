@@ -1,71 +1,26 @@
 #ifndef TEMPERATURESENSOR_H
-  #define TEMPERATURESENSOR_H
+#define TEMPERATURESENSOR_H
 
-  #include "Config.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
-  #define READINGS_TO_COMPUTE_MEAN 6
+#include "settings.h"
 
-  class BaseTemperatureSensor {
-    public:
-      virtual float readTemperature() = 0;
+OneWire oneWire(13);
+DallasTemperature tempSensor(&oneWire);
 
-      void setOffset(float offset) {
-        _offset = offset;
-      }
-      
-      float getOffset() {
-        return _offset;
-      }
+void configTempSensor() {
+  tempSensor.begin();
+}
 
-      void setUseFahrenheit(bool useFahrenheit) {
-        _useFahrenheit = useFahrenheit;
-      }
+float getReadings() {
+  tempSensor.requestTemperatures();
 
-      bool getUseFahrenheit() {
-        return _useFahrenheit;
-      }
-
-    protected:
-      bool _useFahrenheit;
-      float _offset;
-      float _readings[READINGS_TO_COMPUTE_MEAN];
-      uint8_t _previousIndex = 255;
-
-      float calculateTemperature(float currentReading) {
-        // first reading only
-        if(_previousIndex == 255) {
-          for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
-            _readings[i] = currentReading;
-          }
-
-          _previousIndex = 0;
-
-          return currentReading;
-        }
-
-        float sum = 0.0;
-
-        if(++_previousIndex >= READINGS_TO_COMPUTE_MEAN) {
-          _previousIndex = 0;
-        }
-
-        _readings[_previousIndex] = currentReading;
-
-        for(uint8_t i = 0; i < READINGS_TO_COMPUTE_MEAN; i++) {
-          sum += _readings[i];
-        }
-
-        return sum / READINGS_TO_COMPUTE_MEAN;
-      }
-  };
-
-  #if defined USE_BMP280_I2C || defined USE_BMP280_VSPI || defined USE_BMP280_HSPI
-    #include "Sensor-BMP280.h"
-  #endif
-
-  #ifdef USE_DHT11
-    #include "Sensor-DHT.h"
-
-  #endif
+  if(settings.useFahreheit) {
+    return tempSensor.getTempFByIndex(0);
+  } else {
+    return tempSensor.getTempCByIndex(0);
+  }
+}
 
 #endif

@@ -1,23 +1,19 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 
-#include "Config.h"
+#include "TemperatureSensor.h"
 
-class TemperatureSensor : public BaseTemperatureSensor {
+class SensorDHT : public TemperatureSensor {
     public:
-        TemperatureSensor(uint8_t pin, float offset) : sensor(pin, DHT11) {
-            _useFahrenheit = false;
-            _offset = offset;
-            
+        SensorDHT(uint8_t pin) : sensor(pin, DHT11) {
             sensor.begin();
-            delay(5000);
         }
     
-        float readTemperature() {
-            if(_useFahrenheit) {
-                return calculateTemperature(sensor.readTemperature(true) + _offset);
+        float getReadings() {
+            if(settings.useFahreheit) {
+                return calculateTemperature(sensor.readTemperature(true));
             } else {
-                return calculateTemperature(sensor.readTemperature() + _offset);
+                return calculateTemperature(sensor.readTemperature());
             }
         }
 
